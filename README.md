@@ -6,5 +6,8 @@ This project is a QGIS plugin that brings precipitation data from German Weather
 See more at 
 * Project site https://gitlab.com/Weatherman_/radolan2map
 
-* Plugin at [QGIS.org](https://qgis.org): http://plugins.qgis.org/plugins/radolan2map
+* Plugin at [QGIS.org](https://qgis.org): http://plugins.qgis.org/plugins/radolan2map  
 
+  
+
+![result image](https://github.com/Weathermann/radolan2map/blob/master/radolan2map_result.jpg "result image")
