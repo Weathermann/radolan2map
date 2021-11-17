@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/radolan2gis" >
+        <file>img/icon.png</file>
+    </qresource>
+</RCC>

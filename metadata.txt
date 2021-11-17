@@ -1,0 +1,119 @@
+# This file contains metadata for your plugin.
+# This file should be included when you package your plugin.
+# Mandatory items:
+
+[general]
+name=radolan2map
+qgisMinimumVersion=3.0
+# short text which describes the plugin, no HTML allowed:
+description=Brings DWD precipitation products like RADOLAN, RADKLIM and REGNIE onto a map
+version=1.5
+author=Weatherman
+email=radolan2map@e.mail.de
+
+# more detailed description:
+about=This QGIS plugin brings precipitation data from German Meteorological Service (DWD, https://www.dwd.de) - radar data in RADOLAN/RADKLIM binary format in any grid dimension as well as REGNIE - on a map  
+  You also can **add** up RADOLAN data!  
+  Applications: hydrometeorological and agricultural analyses.  
+  
+  RADOLAN overview: https://dwd.de/RADOLAN  
+  RADOLAN data (recent): https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/bin  
+  RADKLIM data (radar climatology): https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/reproc/2017_002/bin  
+  
+  A RADOLAN-RW-testfile (gzipped binary) is included in directory 'example/sample_file/'.
+  
+  The plugin was successfully tested with QGIS 3.10 "A Coruña"  
+  on Windows 10, Linux openSUSE 15.1  
+    
+  Please restart QGIS after updating the plugin!  
+  
+  Code Repository: <a href="https://gitlab.com/Weatherman_/radolan2map">https://gitlab.com/Weatherman_/radolan2map</a>  
+  
+  More info about installation/usage: <a href="https://gitlab.com/Weatherman_/radolan2map/wikis/home">https://gitlab.com/Weatherman_/radolan2map/wikis/home</a>
+  
+  
+tracker=https://gitlab.com/Weatherman_/radolan2map/issues
+repository=https://gitlab.com/Weatherman_/radolan2map
+# End of mandatory metadata
+
+# Recommended items:
+
+hasProcessingProvider=no
+# Uncomment the following line and add your changelog:
+# string, can be multiline, no HTML allowed
+changelog=
+  1.5, 2021-02-26: Bugfix version
+    - ### bug fixed that prevents defining the data dir ###
+    - fixed a possible bug at RADOLAN adding (handling of NaN values)
+    - optimization: RADOLAN adder file access: no glob for every file any more
+    - display of new features, which is presented to the user once
+  1.4, 2020-12-26: Christmas gift: "radolan summation version"
+    - in a separate tab you can now generate a sum product based on individual RADOLAN files!
+    - revised handling of 'interval unit' to assign the proper QML color scale
+    - redesign of internal processes (tasks per tab)
+    - the last used processing tab is saved (will be shown on the next run)
+    - you can define your own logo in 'config.ini' for usage in print layout
+  1.3, 2020-05-21: "print layout version"
+    - print layout implemented
+    - catch global exception, show it to the user as a window
+    - catch exception at reading corrupted RADOLAN bin file and show this in GUI window
+    - links to REGNIE download site included
+    - layer storage folder reorganized - root and data dir
+    - separate subdirectories for the different data types: 'regnie', 'radolan', 'radklim'
+  1.2, 2020-01-24: "REGNIE version"
+    - from now 'radolan2map' can load REGNIE raster files (daily, monthly, yearly)  
+      but the support is rudimentary (data is displayed as point layer)
+    - new button which loads DWDs radar network from layer definition file (qlr)
+  1.1, 2019-12-10:
+    - current DWD radar network in template project included
+    - combo box for selection of destination projection
+    - settings are saved
+    - Checks: writable check of user defined storage folder and mask file
+    - data download link included, icons for links
+  1.0, 2019-11-17: "Tab-Version"
+    - with this extension it is time for a final version now
+    - tab: statistics about the processed product
+    - product history: stores history of selected products
+  0.7, 2019-10-30: "toolbar version"
+    - Toolbar icons
+    - switch to alternative Qt-dialog, because of non-working start directory
+    - test product on the first 2 characters to determine if it is a "X-product"
+      so it is independent from filename
+  0.6, 2019-10-09:
+    - Bugfix: select mask button
+    - 'data dir def file' is stored in QGIS profile folder now, so that it is not lost by plugin update
+  0.5, 2019-10-07: layer storage version
+    - request to the user where the data directory should be set up
+    - cut GeoTIFF directly using shapefile
+    - GUI extension: conversion of RVP6 units -> mm / 5min
+    - Optimization of the GUI elements
+  0.4, 2019-09-27: RX version
+    - RX processing, also WX, EX
+    - hopefully improved floating QDockWidget
+    - template project with state capitals of Germany (as GeoPackage now)
+    - revised symbology QMLs
+  0.3, 2019-09-19: new function: 'exclude zeroes', fixed clipping problem (Windows), using "DEU_adm0" as border dataset now
+  0.2, 2019-09-15: changed from QDialog to QDockWidget
+  0.1, 2019-09-02: first release, plugin uses QDialog, experimental state
+
+# Tags are comma separated with spaces allowed
+tags=DWD,radar,RADKLIM,RADOLAN,REGNIE,raster,precipitation,QPE
+
+homepage=https://gitlab.com/Weatherman_/radolan2map/wikis/home
+# Category of the plugin: Raster, Vector, Database or Web
+category=Raster
+icon=img/icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies=
+
+# If the plugin can run on QGIS Server.
+server=False
+
