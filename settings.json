@@ -1,0 +1,8 @@
+{
+    "mask_file": "/run/media/loki/daten/Entwicklung/git/radolan2map/example/shapes/DEU_adm0/DEU_adm0.shp",
+    "bool_cut": false,
+    "bool_excl_zeroes": false,
+    "bool_symb": false,
+    "regnie": "/run/media/loki/ungesichert/Testdaten/REGNIE/daily/ra151231",
+    "tab_index": 2
+}

@@ -7,7 +7,7 @@ name=radolan2map
 qgisMinimumVersion=3.0
 # short text which describes the plugin, no HTML allowed:
 description=Brings DWD precipitation products like RADOLAN, RADKLIM and REGNIE onto a map
-version=1.5
+version=1.6
 author=Weatherman
 email=radolan2map@e.mail.de
 
@@ -22,18 +22,22 @@ about=This QGIS plugin brings precipitation data from German Meteorological Serv
   
   A RADOLAN-RW-testfile (gzipped binary) is included in directory 'example/sample_file/'.
   
+  REGNIE overview: https://www.dwd.de/DE/leistungen/regnie/regnie.html
+  REGNIE daily data: https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/regnie/
+  REGNIE monthly data: https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/regnie/
+
   The plugin was successfully tested with QGIS 3.10 "A Coruña"  
   on Windows 10, Linux openSUSE 15.1  
     
   Please restart QGIS after updating the plugin!  
   
-  Code Repository: <a href="https://gitlab.com/Weatherman_/radolan2map">https://gitlab.com/Weatherman_/radolan2map</a>  
+  Code Repository: <a href="https://github.com/Weathermann/radolan2map">https://github.com/Weathermann/radolan2map</a>  
   
   More info about installation/usage: <a href="https://gitlab.com/Weatherman_/radolan2map/wikis/home">https://gitlab.com/Weatherman_/radolan2map/wikis/home</a>
   
   
-tracker=https://gitlab.com/Weatherman_/radolan2map/issues
-repository=https://gitlab.com/Weatherman_/radolan2map
+tracker=https://github.com/Weathermann/radolan2map/issues
+repository=https://github.com/Weathermann/radolan2map
 # End of mandatory metadata
 
 # Recommended items:
@@ -42,6 +46,8 @@ hasProcessingProvider=no
 # Uncomment the following line and add your changelog:
 # string, can be multiline, no HTML allowed
 changelog=
+  1.6, 2021-11-26: 
+    - added REGNIE to raster conversion functionality
   1.5, 2021-02-26: Bugfix version
     - ### bug fixed that prevents defining the data dir ###
     - fixed a possible bug at RADOLAN adding (handling of NaN values)
