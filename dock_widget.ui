@@ -42,7 +42,7 @@
      <string/>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab_action">
      <attribute name="icon">
@@ -694,7 +694,7 @@ products</string>
       <property name="geometry">
        <rect>
         <x>170</x>
-        <y>290</y>
+        <y>400</y>
         <width>88</width>
         <height>34</height>
        </rect>
@@ -723,7 +723,7 @@ products</string>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>240</y>
+        <y>330</y>
         <width>361</width>
         <height>41</height>
        </rect>
@@ -733,7 +733,7 @@ products</string>
       <property name="geometry">
        <rect>
         <x>380</x>
-        <y>240</y>
+        <y>330</y>
         <width>51</width>
         <height>41</height>
        </rect>
@@ -763,11 +763,11 @@ products</string>
         <x>10</x>
         <y>20</y>
         <width>431</width>
-        <height>211</height>
+        <height>251</height>
        </rect>
       </property>
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;REGNIE&lt;/span&gt; raster files can be loaded on this page.&lt;/p&gt;&lt;p&gt;This tool is primarily intended for the use of RADOLAN products. Together with the &lt;span style=&quot; font-weight:600;&quot;&gt;settings tab&lt;/span&gt; (storage definition) &lt;span style=&quot; color:#ff0000;&quot;&gt;only this page is relevant for REGNIE!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;There are REGNIE grids in the totals (a possible file name pattern follows) - mostly gzip-compressed (.gz):&lt;span style=&quot; color:#000000;&quot;&gt;&lt;br/&gt;• &lt;/span&gt;&lt;a href=&quot;https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/regnie/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;daily&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; color:#000000;&quot;&gt;: ra200107.gz (07.01.2020)&lt;br/&gt;• &lt;/span&gt;&lt;a href=&quot;https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/regnie/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;monthly&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; color:#000000;&quot;&gt;: RASA1908.gz (2019-08)&lt;br/&gt;• &lt;/span&gt;&lt;a href=&quot;https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/regnie/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;yearly&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; color:#000000;&quot;&gt;: RAS6190.JAH.gz (1961 - 1990)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;REGNIE&lt;/span&gt; raster files can be loaded on this page.&lt;/p&gt;&lt;p&gt;This tool is primarily intended for the use of RADOLAN products. Together with the &lt;span style=&quot; font-weight:600;&quot;&gt;settings tab&lt;/span&gt; (storage definition) &lt;span style=&quot; color:#ff0000;&quot;&gt;only this page is relevant for REGNIE!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;There are REGNIE grids in the totals (a possible file name pattern follows) - mostly gzip-compressed (.gz):&lt;span style=&quot; color:#000000;&quot;&gt;&lt;br/&gt;• &lt;/span&gt;&lt;a href=&quot;https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/regnie/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;daily&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; color:#000000;&quot;&gt;: ra200107.gz (07.01.2020)&lt;br/&gt;• &lt;/span&gt;&lt;a href=&quot;https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/regnie/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;monthly&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; color:#000000;&quot;&gt;: RASA1908.gz (2019-08)&lt;br/&gt;• &lt;/span&gt;&lt;a href=&quot;https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/regnie/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;yearly&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; color:#000000;&quot;&gt;: RAS6190.JAH.gz (1961 - 1990)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -779,35 +779,11 @@ products</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="label_regnie_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>360</y>
-        <width>421</width>
-        <height>121</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;radolan2map&lt;/span&gt; only offers rudimentary REGNIE support. This tool is primarily intended for the use of RADOLAN products. It is only able to display the values of REGNIE cells as point layer. If you can improve that...&lt;br/&gt;but you can join these points with a REGNIE shape file (offered on the CDC at DWD) to get a rasterized visualization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-      </property>
-      <property name="wordWrap">
-       <bool>true</bool>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_18">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>220</y>
+        <y>310</y>
         <width>251</width>
         <height>18</height>
        </rect>
