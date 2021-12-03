@@ -121,9 +121,10 @@ class ActionTabRegnie(ActionTabBase):
                 """ Under Linux a "ModuleNotFoundError: No module named '_gdal'"
                 error can occur. """
                 msg = f"Exception: {e}:\nPossibly a GDAL installation error on Linux(?)"
-                regnie_raster_file = "/run/media/loki/ungesichert/Testdaten/REGNIE/raster/RASA1908.tif"    # for testing
+                #regnie_raster_file = "/run/media/loki/ungesichert/Testdaten/REGNIE/raster/RASA1908.tif"    # for testing
                 super()._show_critical_message_box(msg, 'REGNIE raster conversion error')
-                self.out(f"{msg}\nload REGNIE test raster file: {regnie_raster_file}", False)
+                #self.out(f"{msg}\nload REGNIE test raster file: {regnie_raster_file}", False)
+                self.out(f"{msg}")
             except Exception as e:
                 msg = f"Exception: {e}"
                 self.out(f"{msg}")
