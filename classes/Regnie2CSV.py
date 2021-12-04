@@ -53,6 +53,9 @@ update: 17.01.2020
 import sys
 from pathlib import Path
 import gzip
+import numpy as np
+
+from Regnie import Regnie
 
 
 NEWLINE_LEN = 1
@@ -188,9 +191,26 @@ class Regnie2CSV:
         Erstellt eine kleine CSV-Datei, die nur die Daten und eine ID-Spalte
         enthält. Mittels ID können die Daten mit einem Shapefile kombiniert werden.
         """
+        csv_missing = -1
         
-        f_in = self._get_file_object()
+        rg = Regnie(self._regnie_raster_file)
+        array = rg.to_array()
         
+        # calculate statistics
+        
+        # extract only valid cells
+        if rg.datatype == "daily":
+            arr_valid = np.extract(~np.isnan(array), array)
+        elif rg.datatype == "monthly":
+            arr_valid = np.extract(array != -999, array)
+
+        self._max = np.max(arr_valid)
+        self._min = np.min(arr_valid)
+        self._total_pixel = array.size
+        self._valid_pixel = arr_valid.size
+        self._non_valid_pixel = self._total_pixel - self._valid_pixel
+        self._mean = np.mean(arr_valid)
+
         f_out = self._csv_pathname.open("w")
         
         # Kopfzeile:
@@ -199,70 +219,30 @@ class Regnie2CSV:
             f_out.write("ID,VAL\n")
         else:
             f_out.write("LAT,LON,ID,VAL\n")
-        
-        
-        # Beginn mit Zelle...
-        _id = 1             # für Vergleich mit Regnie-Polygonen im GIS eingeführt
-        
-        csv_missing = -1
-        _sum = 0    # for mean
-        
-        # Beginn mit 1 und Ende + 1, um REGNIE-konforme Pixelindizes zu erhalten
-        for y in range(1, Y_MAX+1):
             
-            for x in range(1, X_MAX+1):
+        # iterate over the array and write to CSV
+        id = 0
+        with np.nditer(array, flags=['multi_index'], order="C") as it:
+            for val in it:
+                col = it.multi_index[0] + 1
+                row = it.multi_index[1] + 1
+                id += 1
                 
-                self._total_pixel += 1
+                # handle and convert error values
+                if rg.datatype == "daily" and np.isnan(val):
+                    val = csv_missing
+                elif rg.datatype == "monthly" and val == -999:
+                    val = csv_missing
                 
-                val = int(f_in.read(4))
-                
-                if val < 0:   # In Ursprungs-Rasterdatei: -999
-                    self._non_valid_pixel += 1
-                    if self._ignore_missings:
-                        continue
-                    val = csv_missing    # weiter mit diesem Wert
-                
-                elif self._divide:
-                    val /= 10.0
-                
-                
+                # write csv line
                 if join_mode:
-                    f_out.write("{},{}\n".format(_id, val) )
+                    f_out.write("{},{}\n".format(id, val) )
                 else:
-                    point = (y,x)
+                    point = (col, row)
                     lat, lon = self._cartesian_point_to_latlon(point)
-                    f_out.write("{:f},{:f},{},{}\n".format(lat, lon, _id, val) )
-                
-                
-                # no missing value:
-                if val > csv_missing:
-                    self._valid_pixel += 1
-                    _sum += val
+                    f_out.write("{:f},{:f},{},{}\n".format(lat, lon, id, val) )
                     
-                    # note maximum:
-                    if val > self._max:
-                        self._max = val
-                    
-                    if val < self._min:
-                        self._min = val
-                # val
-                
-                _id += 1
-            # for x
-            
-            # Zeile vollständig:
-            f_in.read(NEWLINE_LEN)
-            print(".", end="")   # zu viele Pixel, daher nur 'for y'
-        # for y
-        
-        print()
-        
-        self._mean = _sum / self._valid_pixel
-        
-        f_in.close()
         f_out.close()
-    # def _convert...
-    
     
     def _get_file_object(self):
         if str(self._regnie_raster_file).endswith('.gz'):
