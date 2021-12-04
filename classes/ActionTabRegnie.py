@@ -14,11 +14,9 @@ from qgis.PyQt.QtWidgets import QFileDialog
 
 # own classes:
 from ActionTabBase  import ActionTabBase         # base class
-from Regnie2CSV     import Regnie2CSV
 from LayerLoader    import LayerLoader
+from Regnie         import Regnie
 import regnie2raster as r2r
-
-
 
 class ActionTabRegnie(ActionTabBase):
     '''
@@ -92,45 +90,31 @@ class ActionTabRegnie(ActionTabBase):
                 self.out(f"create data dir for converted REGNIE: '{data_dir}'")
             except FileExistsError:
                 pass
-            
-            
-            regnie_csv_file, char_period_indicator, t_statictics = \
-                self.__convert_regnie_raster2csv(regnie_file, data_dir)
-            
-            '''
-            LAT,LON,ID,VAL
-            55.058333,8.383333,1,7
-            55.058333,8.400000,2,7
-            '''
-
-            show_csv = True
-            # but CSV is only displayed in case of errors (fallback) because raster format is better
-            # but True is better here because of exception handling (set False at one place)
+                
+            # instantiate a Regnie class instance
+            rg = Regnie(str(regnie_file))
+            self.out(f"Detected REGNIE datatype: {rg.datatype}")
             
             # convert to raster
-            # TODO: assumes the file has already been decompressed from gz!
-
             self.out("Starting REGNIE to raster conversion...")
-            regnie_raster_file = data_dir / f"{regnie_file.name}.tif"
-
+            regnie_raster_file = data_dir / f"{regnie_file.name.replace('.gz', '')}.tif"
             try:
-                r2r.regnie2raster(regnie_file, str(regnie_raster_file))
-            # Exceptions,
-            # but nevertheless load the CSV file:
+                #TODO: this currently reads the REGNIE file a second time
+                r2r.regnie2raster(str(regnie_file), str(regnie_raster_file))
             except ModuleNotFoundError as e:
                 """ Under Linux a "ModuleNotFoundError: No module named '_gdal'"
                 error can occur. """
                 msg = f"Exception: {e}:\nPossibly a GDAL installation error on Linux(?)"
-                regnie_raster_file = "/run/media/loki/ungesichert/Testdaten/REGNIE/raster/RASA1908.tif"    # for testing
+                self.out(f"{msg}")
                 super()._show_critical_message_box(msg, 'REGNIE raster conversion error')
-                self.out(f"{msg}\nload REGNIE test raster file: {regnie_raster_file}", False)
+                return
             except Exception as e:
                 msg = f"Exception: {e}"
                 self.out(f"{msg}")
                 super()._show_critical_message_box(msg, 'REGNIE raster conversion error')
-            else:
-                self.out(f"Successfully created REGNIE raster file {regnie_raster_file}!")
-                show_csv = False
+                return
+            
+            self.out(f"Successfully created REGNIE raster file {regnie_raster_file}!")
             
         except Exception as e:
             msg = f"{e}, wrong format!"
@@ -147,68 +131,31 @@ class ActionTabRegnie(ActionTabBase):
         """
 
         # Determine prepared QML-File delivered with the plugin:
-        self.out(f"char period indicator = '{char_period_indicator}'")
-
         d_regnie_qml = {
-            'd': ("regnie_raster_daily.qml", 'regnie_daily.qml'),
-            'm': ("regnie_raster_monthly.qml", 'regnie_monthly.qml'),
-            'y': ("regnie_raster_yearly.qml", 'regnie_yearly.qml'),
+            'daily': "regnie_raster_daily.qml",
+            'monthly': "regnie_raster_monthly.qml",
+            'yearly': "regnie_raster_yearly.qml",
         }
 
         ll = LayerLoader(self._iface)  # 'iface' is from 'radolan2map'
 
         # load the regnie raster file
-        qml_file = self._model.symbology_path / d_regnie_qml[char_period_indicator][0]
+        qml_file = self._model.symbology_path / d_regnie_qml[rg.datatype]
         ll.load_raster(regnie_raster_file, qml_file)
 
-        if show_csv:
-            # load the CSV file
-            qml_file = self._model.symbology_path / d_regnie_qml[char_period_indicator][1]
-            ll.load_vector(regnie_csv_file, qml_file)    # incompatible with Path()!
-
-        
-        filename, dim, _max, _min, mean, total, valid, non_valid = t_statictics
-        filename = filename.replace('.gz', '')    # maybe 'RASA1908.gz'
-        
-        dock.text_filename.setText(filename)
-        dock.text_shape.setText(dim)
-        dock.text_max.setText(str(_max))
-        dock.text_min.setText(str(_min))
-        dock.text_mean.setText(f"{mean:.1f}")
-        dock.text_total_pixels.setText(str(total))
-        dock.text_valid_pixels.setText(str(valid))
-        dock.text_nonvalid_pixels.setText(str(non_valid))
+        # fill statistics output
+        stats = rg.statistics
+        dock.text_filename.setText(regnie_file.name.replace(".gz", ""))
+        dock.text_shape.setText(f"{rg.data.shape}")
+        dock.text_max.setText(f"{stats['max']:.1f}")
+        dock.text_min.setText(f"{stats['min']:.1f}")
+        dock.text_mean.setText(f"{stats['mean']:.1f}")
+        dock.text_total_pixels.setText(f"{stats['total_pixels']}")
+        dock.text_valid_pixels.setText(f"{stats['valid_pixels']}")
+        dock.text_nonvalid_pixels.setText(f"{stats['non_valid_pixels']}")
         
         super()._enable_and_show_statistics_tab()
         super()._finish()
-    
-    
-    
-    def __convert_regnie_raster2csv(self, regnie_raster_file, data_dir):
-        '''
-        - separate the usage of the REGNIE-Class
-        - Pass exceptions to caller
-        
-        can raise Exception
-        '''
-        
-        self.out(f"__convert_regnie_raster2csv('{regnie_raster_file}')")
-        
-        
-        regnie_converter = Regnie2CSV(regnie_raster_file)
-        """
-        There are quite a few missing values in the Regnie grid; it therefore makes sense
-        not to write these values out in favor of smaller output files.
-        -> about 7.5 MB compared to 13 MB
-        """
-        regnie_converter.ignore_missings = True
-        regnie_converter.convert(out_dir=data_dir)
-        
-        t_statictics = regnie_converter.get_statistics()
-        
-        return regnie_converter.csv_pathname, regnie_converter.char_period_indicator, t_statictics
-        
-
     
     # ......................................................................
     

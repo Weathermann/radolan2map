@@ -15,9 +15,7 @@ https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/regnie/
 
 @author: Felix Froehlich
 """
-import os, sys
 import argparse
-import re
 
 import numpy as np
 from osgeo import gdal
@@ -34,7 +32,6 @@ def regnie2raster(file_regnie: str, file_raster: str) -> None:
     """
     # get array values from regnie file
     rg = Regnie(file_regnie)
-    array = rg.to_array()
     
     # define pixel size and origin
     # from https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/regnie/REGNIE_Beschreibung_20201109.pdf
@@ -46,7 +43,7 @@ def regnie2raster(file_regnie: str, file_raster: str) -> None:
     origin = (x_min - x_delta / 2, y_max + y_delta / 2) # include half cell offset
 
     # save as raster
-    array2raster(file_raster, origin, x_delta, y_delta, array)
+    array2raster(file_raster, origin, x_delta, y_delta, rg.data)
     
 def array2raster(outfile: str, rasterOrigin: tuple, pixelWidth: int, pixelHeight: int, array: np.array) -> None:
     """
