@@ -2,13 +2,14 @@
 """
 Class for reading REGNIE files
 
-Can handle both daily and monthly REGNIE files
+Can handle daily, monthly and multiannual REGNIE files
 
 REGNIE description: https://www.dwd.de/DE/leistungen/regnie/regnie.html
 
 REGNIE files are freely available from the DWD open data platform:
 https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/regnie/
 https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/regnie/
+https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/regnie/
 
 @author: Felix Froehlich
 
@@ -40,9 +41,9 @@ class Regnie:
         self._datatype = self._get_datatype()
         self._data = None
 
-        self.read_file()
+        self._read_file()
 
-    def read_file(self):
+    def _read_file(self):
         """
         Reads the REGNIE file and stores the values in the `data` property
         """
@@ -63,13 +64,11 @@ class Regnie:
                 strings.append(line[j*4:(j*4)+4])
                 
             # convert strings to values depending on datatype
-            if self.datatype == "monthly":
+            if self.datatype in ["monthly", "multiannual"]:
                 values = [int(s) for s in strings]
             elif self.datatype == "daily":
                 values = [float(s) if s != "-999" else np.nan for s in strings]
                 values = [v / 10.0 for v in values]
-            else:
-                raise NotImplementedError(f"REGNIE datatype {self.datatype} is not yet implemented!")
                 
             rows.append(values)
 
@@ -82,17 +81,20 @@ class Regnie:
         Determines the data type of a REGNIE file from its filename
         
         Examples:
-         RASA2110 - monthly values
          ra210627 - daily values
+         RASA2110 - monthly values
+         RAS9120.JAH - multiannual values
         
         :param file_regnie: REGNIE file
-        :return: either "monthly" or "daily"
+        :return: "daily", "monthly" or "multiannual"
         """
         filename = os.path.basename(self._filepath)
-        if re.fullmatch(r"RASA\d{4}(\.gz)?", filename, re.I):
-            return "monthly"
-        elif re.fullmatch(r"ra\d{6}(\.gz)?", filename, re.I):
+        if re.fullmatch(r"ra\d{6}(\.gz)?", filename, re.I):
             return "daily"
+        elif re.fullmatch(r"RASA\d{4}(\.gz)?", filename, re.I):
+            return "monthly"
+        elif re.fullmatch(r"RAS\d{4}\.[a-z]+(\.gz)?", filename, re.I):
+            return "multiannual"
         else:
             raise Exception(f"Unable to determine REGNIE data type from filename {filename}!")
 
@@ -120,8 +122,8 @@ class Regnie:
         """
         Returns the values contained in the REGNIE file as a numpy array
 
-        The data type of the array is integer for monthly values and float for daily values
-        REGNIE error values ("-999") are preserved as -999 for monthly values and replaced with np.nan for daily values
+        The data type of the array is integer for monthly and multiannual values and float for daily values
+        REGNIE error values ("-999") are preserved as -999 for monthly and multiannual values and replaced with np.nan for daily values
         Daily REGNIE values are converted from 1/10 mm to mm
         
         :return: a two-dimensional numpy array
@@ -147,7 +149,7 @@ class Regnie:
         # extract only valid cells
         if self.datatype == "daily":
             valid_data = np.extract(~np.isnan(self.data), self.data)
-        elif self.datatype == "monthly":
+        elif self.datatype in ["monthly", "multiannual"]:
             valid_data = np.extract(self.data != -999, self.data)
 
         stats = {

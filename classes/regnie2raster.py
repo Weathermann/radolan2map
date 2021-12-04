@@ -2,9 +2,9 @@
 """
 Converts a REGNIE file to a raster file (geotiff)
 
-This script can handle both daily and monthly REGNIE files
+This script can handle daily, monthly and multiannual REGNIE files
 
-Monthly REGNIE files contain values in the unit mm and are converted to Int32 rasters with a NoData value of -999
+Monthly and multiannual REGNIE files contain values in the unit mm and are converted to Int32 rasters with a NoData value of -999
 Daily REGNIE files contain values in the unit 1/10 mm, which are first converted to mm and then converted to Float64 rasters with a default NoData value
 
 REGNIE description: https://www.dwd.de/DE/leistungen/regnie/regnie.html
@@ -12,6 +12,7 @@ REGNIE description: https://www.dwd.de/DE/leistungen/regnie/regnie.html
 REGNIE files are freely available from the DWD open data platform:
 https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/regnie/
 https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/regnie/
+https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/regnie/
 
 @author: Felix Froehlich
 """
@@ -96,9 +97,9 @@ if __name__ == "__main__":
             description="""
 Converts a REGNIE file to a raster file (geotiff)
 
-This script can handle both daily and monthly REGNIE files
+This script can handle daily, monthly and multiannual REGNIE files
 
-Monthly REGNIE files contain values in the unit mm and are converted to Int32 rasters with a NoData value of -999
+Monthly and multiannual REGNIE files contain values in the unit mm and are converted to Int32 rasters with a NoData value of -999
 Daily REGNIE files contain values in the unit 1/10 mm, which are first converted to mm and then converted to Float64 rasters with a default NoData value
 
 REGNIE description: https://www.dwd.de/DE/leistungen/regnie/regnie.html
@@ -106,6 +107,7 @@ REGNIE description: https://www.dwd.de/DE/leistungen/regnie/regnie.html
 REGNIE files are freely available from the DWD open data platform:
 https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/regnie/
 https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/regnie/
+https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/regnie/
 """
         )
         

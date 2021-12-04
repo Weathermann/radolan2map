@@ -134,7 +134,7 @@ class ActionTabRegnie(ActionTabBase):
         d_regnie_qml = {
             'daily': "regnie_raster_daily.qml",
             'monthly': "regnie_raster_monthly.qml",
-            'yearly': "regnie_raster_yearly.qml",
+            'multiannual': "regnie_raster_yearly.qml",
         }
 
         ll = LayerLoader(self._iface)  # 'iface' is from 'radolan2map'
