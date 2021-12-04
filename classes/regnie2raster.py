@@ -23,15 +23,18 @@ import numpy as np
 from osgeo import gdal
 from osgeo import osr
 
+from Regnie import Regnie
+
 def regnie2raster(file_regnie: str, file_raster: str) -> None:
     """
     Converts a REGNIE file to a raster file (geotiff)
 
     :param file_regnie: input REGNIE file
-    :param file_regnie: output REGNIE file
+    :param file_raster: output raster file
     """
     # get array values from regnie file
-    array = regnie2array(file_regnie)
+    rg = Regnie(file_regnie)
+    array = rg.to_array()
     
     # define pixel size and origin
     # from https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/regnie/REGNIE_Beschreibung_20201109.pdf
@@ -45,67 +48,6 @@ def regnie2raster(file_regnie: str, file_raster: str) -> None:
     # save as raster
     array2raster(file_raster, origin, x_delta, y_delta, array)
     
-def regnie2array(file_regnie: str) -> np.array:
-    """
-    Reads a REGNIE file as a numpy array
-    
-    The data type of the returned array is integer for monthly values and float for daily values
-    REGNIE error values ("-999") are preserved as -999 for monthly values and replaced with np.nan for daily values
-    Daily REGNIE values are converted from 1/10 mm to mm
-    
-    :param file_regnie: path to the REGNIE file
-    
-    :return: a two-dimensional numpy array
-    """
-    # determine REGNIE datatype
-    datatype = regnie_datatype(file_regnie)
-
-    with open(file_regnie, "r") as f:
-        rows = []
-        for i, line in enumerate(f, start=1):
-            if i > 971:
-                # in daily datasets, the last line contains other stuff we don't need
-                break
-            line = line.strip()
-            # split line into strings of 4 characters each
-            strings = []
-            for j in range(len(line) // 4):
-                strings.append(line[j*4:(j*4)+4])
-                
-            # convert strings to values depending on datatype
-            if datatype == "monthly":
-                values = [int(s) for s in strings]
-            elif datatype == "daily":
-                values = [float(s) if s != "-999" else np.nan for s in strings]
-                values = [v / 10.0 for v in values]
-            else:
-                raise NotImplementedError(f"REGNIE datatype {datatype} is not yet implemented!")
-                
-            rows.append(values)
-
-    array = np.array(rows)
-    
-    return array
-    
-def regnie_datatype(file_regnie: str) -> str:
-    """
-    Determines the data type of a REGNIE file from its filename
-    
-    Examples:
-     RASA2110 - monthly values
-     ra210627 - daily values
-    
-    :param file_regnie: REGNIE file
-    :return: either "monthly" or "daily"
-    """
-    filename = os.path.basename(file_regnie)
-    if re.fullmatch(r"RASA\d{4}", filename, re.I):
-        return "monthly"
-    elif re.fullmatch(r"ra\d{6}", filename, re.I):
-        return "daily"
-    else:
-        raise Exception(f"Unable to determine REGNIE data type from filename {filename}!")
-
 def array2raster(outfile: str, rasterOrigin: tuple, pixelWidth: int, pixelHeight: int, array: np.array) -> None:
     """
     writes a numpy array to a raster file (geotiff)
