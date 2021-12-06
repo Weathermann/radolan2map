@@ -1,5 +1,2 @@
-# Compiled resources
-resources.py
-
-# VS Code
-.vscode
+__pycache__
+classes/__pycache__
