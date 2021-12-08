@@ -17,6 +17,7 @@ https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/regni
 @author: Felix Froehlich
 """
 import argparse
+from pathlib import Path
 
 import numpy as np
 from osgeo import gdal
@@ -24,7 +25,7 @@ from osgeo import osr
 
 from Regnie import Regnie
 
-def regnie2raster(file_regnie: str, file_raster: str) -> None:
+def regnie2raster(file_regnie: Path, file_raster: Path) -> None:
     """
     Converts a REGNIE file to a raster file (geotiff)
 
@@ -46,12 +47,12 @@ def regnie2raster(file_regnie: str, file_raster: str) -> None:
     # save as raster
     array2raster(file_raster, origin, x_delta, y_delta, rg.data)
     
-def array2raster(outfile: str, rasterOrigin: tuple, pixelWidth: int, pixelHeight: int, array: np.array) -> None:
+def array2raster(outfile: Path, rasterOrigin: tuple, pixelWidth: int, pixelHeight: int, array: np.array) -> None:
     """
     writes a numpy array to a raster file (geotiff)
     adapted from https://pcjericks.github.io/py-gdalogr-cookbook/raster_layers.html#create-raster-from-array
     
-    :param outfile: output raster file
+    :param outfile: path to output raster file
     :param rasterOrigin: tuple (x, y) of the top left coordinates of the raster
     :param pixelWidth: pixel width
     :param pixelHeight: pixel height
@@ -73,7 +74,7 @@ def array2raster(outfile: str, rasterOrigin: tuple, pixelWidth: int, pixelHeight
 
     driver = gdal.GetDriverByName('GTiff')
 
-    outRaster = driver.Create(outfile, cols, rows, 1, typ)
+    outRaster = driver.Create(str(outfile), cols, rows, 1, typ)
     outRaster.SetGeoTransform((originX, pixelWidth, 0, originY, 0, -pixelHeight))
 
     outband = outRaster.GetRasterBand(1)
@@ -116,7 +117,7 @@ https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/regni
         
         args = parser.parse_args()
         
-        regnie2raster(args.regnie_file, args.output_file)
+        regnie2raster(Path(args.regnie_file), Path(args.output_file))
         
         print("Conversion successful!")
 

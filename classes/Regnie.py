@@ -15,9 +15,9 @@ https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/regni
 
 partially based on Regnie2CSV.py by Mario Hafer, Deutscher Wetterdienst (DWD)
 """
-import os
 import re
 import gzip
+from pathlib import Path
 
 import numpy as np
 
@@ -27,17 +27,17 @@ X_MAX = 611
 
 class Regnie:
 
-    def __init__(self, file_regnie: str):
+    def __init__(self, file_regnie: Path):
         """
         Instantiates a new Regnie class instance representing a REGNIE file.
         The file is read immediately.
 
         :param file_regnie: path to the REGNIE file (can be gz compressed)
         """
-        if not os.path.exists(file_regnie):
+        if not file_regnie.exists():
             raise FileNotFoundError(f"File not found: {file_regnie}")
             
-        self._filepath = file_regnie
+        self._file = file_regnie
         self._datatype = self._get_datatype()
         self._data = None
 
@@ -47,10 +47,10 @@ class Regnie:
         """
         Reads the REGNIE file and stores the values in the `data` property
         """
-        if self._filepath.endswith(".gz"):
-            file = gzip.open(self._filepath, "rt")
+        if self._file.name.endswith(".gz"):
+            file = gzip.open(self._file, "rt")
         else:
-            file = open(self._filepath, "r")
+            file = open(self._file, "r")
 
         rows = []
         for i, line in enumerate(file, start=1):
@@ -88,15 +88,14 @@ class Regnie:
         :param file_regnie: REGNIE file
         :return: "daily", "monthly" or "multiannual"
         """
-        filename = os.path.basename(self._filepath)
-        if re.fullmatch(r"ra\d{6}(\.gz)?", filename, re.I):
+        if re.fullmatch(r"ra\d{6}(\.gz)?", self._file.name, re.I):
             return "daily"
-        elif re.fullmatch(r"RASA\d{4}(\.gz)?", filename, re.I):
+        elif re.fullmatch(r"RASA\d{4}(\.gz)?", self._file.name, re.I):
             return "monthly"
-        elif re.fullmatch(r"RAS\d{4}\.[a-z]+(\.gz)?", filename, re.I):
+        elif re.fullmatch(r"RAS\d{4}\.[a-z]+(\.gz)?", self._file.name, re.I):
             return "multiannual"
         else:
-            raise Exception(f"Unable to determine REGNIE data type from filename {filename}!")
+            raise Exception(f"Unable to determine REGNIE data type from filename {self._file.name}!")
 
     def _pixel_to_latlon(self, x: int, y: int) -> tuple:
         """ 
@@ -135,7 +134,7 @@ class Regnie:
         """
         Returns the data type of the REGNIE file
         
-        :return: either "monthly" or "daily"
+        :return: either "daily", "monthly" or "multiannual"
         """
         return self._datatype
 

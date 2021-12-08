@@ -6,8 +6,6 @@ Separate __actions__ of REGNIE operations from the other components
 Created on 01.12.2020
 @author: Weatherman
 """
-
-import os
 from pathlib import Path
 
 from qgis.PyQt.QtWidgets import QFileDialog
@@ -92,7 +90,7 @@ class ActionTabRegnie(ActionTabBase):
                 pass
                 
             # instantiate a Regnie class instance
-            rg = Regnie(str(regnie_file))
+            rg = Regnie(regnie_file)
             self.out(f"Detected REGNIE datatype: {rg.datatype}")
             
             # convert to raster
@@ -100,7 +98,7 @@ class ActionTabRegnie(ActionTabBase):
             regnie_raster_file = data_dir / f"{regnie_file.name.replace('.gz', '')}.tif"
             try:
                 #TODO: this currently reads the REGNIE file a second time
-                r2r.regnie2raster(str(regnie_file), str(regnie_raster_file))
+                r2r.regnie2raster(regnie_file, regnie_raster_file)
             except ModuleNotFoundError as e:
                 """ Under Linux a "ModuleNotFoundError: No module named '_gdal'"
                 error can occur. """
