@@ -66,7 +66,9 @@ class LayerLoader:
             title, msg, level=qgis_state, duration=duration
         )
 
-    def load_raster(self, tif_file, qml_file=None):
+    def load_raster(self, tif_file, qml_file=None, temporal=False):
+
+        self.temporal = temporal
 
         bn = Path(tif_file).name
 
@@ -189,8 +191,8 @@ class LayerLoader:
             self._set_zeroes_invisible(layer)
 
         # Set temporal settings for layer (since QGIS 3.14)
-        self.out("Setting temporal settings ...")
-        if Qgis.QGIS_VERSION_INT >= 31400:
+        if self.temporal and Qgis.QGIS_VERSION_INT >= 31400:
+            self.out("Setting temporal settings ...")
             self._set_time_range(layer)
 
         # Insert layer at a certain position
