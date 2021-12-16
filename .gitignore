@@ -1,2 +1,7 @@
+# Python compiled
 __pycache__
 classes/__pycache__
+resources.py
+
+# VS Code
+.vscode
