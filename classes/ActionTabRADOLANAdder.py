@@ -254,7 +254,7 @@ class ActionTabRADOLANAdder(ActionTabBase):
         qml_file = self._model.qml_file(interval_minutes)    # <dest_prod_id>.qml or 'None'
         
         ll = LayerLoader(self._iface)    # 'iface' is from 'radolan2map'
-        ll.load_raster(tif_file, qml_file)
+        ll.load_raster(tif_file, qml_file, temporal=False)
         
         dock.btn_run_adder.setEnabled(True)    # re-activate
         

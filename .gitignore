@@ -1,2 +1,10 @@
+# Python compiled
 __pycache__
 classes/__pycache__
+resources.py
+
+# pb_tools zip build
+zip_build/
+
+# VS Code
+.vscode
