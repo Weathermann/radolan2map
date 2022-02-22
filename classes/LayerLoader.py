@@ -15,15 +15,15 @@ from qgis.core import QgsVectorLayer, QgsRasterLayer, QgsMapLayer
 
 
 class LayerLoader:
-    '''
+    """
     classdocs
-    '''
+    """
     
     
     def __init__(self, iface):
-        '''
+        """
         Constructor
-        '''
+        """
         
         print(self)
         
@@ -41,9 +41,9 @@ class LayerLoader:
     
     def out(self, s, ok=True):
         if ok:
-            print("{}: {}".format(self, s))
+            print(f"{self}: {s}")
         else:
-            print("{}: {}".format(self, s), file=sys.stderr)
+            print(f"{self}: {s}", file=sys.stderr)
         
     
     
@@ -51,11 +51,11 @@ class LayerLoader:
         
         if qgis_state == Qgis.Success:
             title = "Success"
-            msg = 'Layer "{}" loaded!'.format(layer_name)
+            msg = f'Layer "{layer_name}" loaded!'
         else:
             title = "Error"
-            msg = 'Layer "{}" failed to load!'.format(layer_name)
-            self.out(msg, False )
+            msg = f'Layer "{layer_name}" failed to load!'
+            self.out(msg, False)
         
         self._iface.messageBar().pushMessage(title, msg, level=qgis_state, duration=duration)
     
@@ -134,8 +134,8 @@ class LayerLoader:
         # -> was working, simpler variant:
         #uri = "{}{}?delimiter=,&xField=LON&yField=LAT".format('file:///', regnie_csv_file)
         # but not on Windows - needs crs specified:
-        uri = "{}{}?delimiter=,&xField=LON&yField=LAT&crs=EPSG:4326".format('file:///', csv_file)
-        self.out("uri: {}".format(uri))
+        uri = f"file:///{csv_file}?delimiter=,&xField=LON&yField=LAT&crs=EPSG:4326"
+        self.out(f"uri: {uri}")
         
         # Make a vector layer:
         csv_layer = QgsVectorLayer(uri, csv_file.name, 'delimitedtext')
@@ -156,8 +156,8 @@ class LayerLoader:
         layers = QgsProject.instance().mapLayersByName(layer_name)
         
         for layer in layers:
-            self.out('Layer with existing name "{}" found - removing.'.format(layer.name()))
-            QgsProject.instance().removeMapLayer( layer.id() )
+            self.out(f'Layer with existing name "{layer.name()}" found - removing.')
+            QgsProject.instance().removeMapLayer(layer.id())
         
     
     def _insert_layer(self, layer, qml_file, duration):
@@ -176,12 +176,10 @@ class LayerLoader:
         else:
             #layer.setLayerTransparency(40)    # %    this method seems only be available for vector layer
             layer.setOpacity(opa)
-        
-        
+
         if self._no_zeros:
             self._set_zeroes_invisible(layer)
-        
-        
+
         # Insert layer at a certain position
         
         # Add the layer to the QGIS Map Layer Registry (the second argument must be set to False
@@ -221,7 +219,7 @@ class LayerLoader:
         @param raster_layer: QgsRasterLayer
         """
         
-        self.out("using QML file '{}'".format(qml_file))
+        self.out(f"using QML file '{qml_file}'")
         
         #if layer.geometryType() == QGis.Point:
         layer.loadNamedStyle(str(qml_file))    # str() if Path

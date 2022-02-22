@@ -31,15 +31,15 @@ class GDALProcessing:
     
     
     def __init__(self, model, full_asc_filename, full_tif_filename):
-        '''
+        """
         Constructor
-        '''
+        """
         
-        self.out("<- {}, '{}', '{}'".format("model", full_asc_filename, full_tif_filename))
+        self.out(f"<- model, '{full_asc_filename}', '{full_tif_filename}'")
         
         
         #
-        # Übergaben
+        # Input data
         #
         
         if not model:
@@ -74,9 +74,9 @@ class GDALProcessing:
     
     def out(self, s, ok=True):
         if ok:
-            print("{}: {}".format(self, s))
+            print(f"{self}: {s}")
         else:
-            print("{}: {}".format(self, s), file=sys.stderr)
+            print(f"{self}: {s}", file=sys.stderr)
     
     
     
@@ -86,10 +86,8 @@ class GDALProcessing:
         """
         
         # starting with 'python3' so that it work on Windows?
-        cmd = 'python3 {} "{}"  -o "{}"'.format(self._convert_script_path,
-                                                self._full_asc_filename,
-                                                path.dirname(self._full_tif_filename))
-        self.out('running: "{}"'.format(cmd))
+        cmd = f'python3 {self._convert_script_path} "{self._full_asc_filename}"  -o "{self._full_tif_filename.parent}"'
+        self.out(f'running: "{cmd}"')
         """
         * To also capture standard error in the result, use stderr=subprocess.STDOUT
         * shell=True, wenn cmd=string. Sonst als []
@@ -111,7 +109,7 @@ class GDALProcessing:
         Convert by OSGEO python gdal module
         """
         
-        self.out("produce_warped_tif_by_python_gdal('{}', shapefile='{}')".format(prj_dest_epsg, shapefile))
+        self.out(f"produce_warped_tif_by_python_gdal('{prj_dest_epsg}', shapefile='{shapefile}')")
         
         #proj4_params = "+proj=stere +lat_0=90 +lat_ts=60 +lon_0=10 +k=0.93301270189"\
         # + " +x_0=0 +y_0=0 +a=6370040 +b=6370040 +units=m +no_defs"
@@ -163,8 +161,9 @@ PROJCS["DWD (RADOLAN)",
         """
         Beginn
         """
-        
-        ds_in = gdal.Open(self._full_asc_filename)
+
+        # string type important! otherwise problems with gdal.Warp()!
+        ds_in = gdal.Open(str(self._full_asc_filename))
         #srs = osr.SpatialReference()
         #srs.ImportFromWkt(spatial_ref)
         #ds_in.SetProjection(srs.ExportToWkt())
@@ -179,7 +178,7 @@ PROJCS["DWD (RADOLAN)",
     
         #gdal.Warp(tif_file, ds_in, srcSRS=proj4_params, dstSRS='EPSG:3035')
         
-        self.out("gdal.Warp from '{}' -> '{}'".format(prj_src, prj_dest_epsg))
+        self.out(f"gdal.Warp from '{prj_src}' -> '{prj_dest_epsg}'")
         #compress_method = 'LZW'
         compress_method = 'DEFLATE'    # lossless
         
@@ -187,15 +186,15 @@ PROJCS["DWD (RADOLAN)",
         
         # with clipping:
         if shapefile:
-            gdal.Warp(self._full_tif_filename, ds_in,
-                  cutlineDSName='{}'.format(shapefile), cropToCutline=True,
+            gdal.Warp(str(self._full_tif_filename), ds_in,
+                  cutlineDSName=f'{shapefile}', cropToCutline=True,
                   srcSRS=prj_src, dstSRS=prj_dest_epsg,
-                  creationOptions=['COMPRESS={}'.format(compress_method)])
+                  creationOptions=[f'COMPRESS={compress_method}'])
         # without clipping:
         else:
-            gdal.Warp(self._full_tif_filename, ds_in,
+            gdal.Warp(str(self._full_tif_filename), ds_in,
                   srcSRS=prj_src, dstSRS=prj_dest_epsg,
-                  creationOptions=['COMPRESS={}'.format(compress_method)])
+                  creationOptions=[f'COMPRESS={compress_method}'])
         
         
     
@@ -237,7 +236,7 @@ PROJCS["DWD (RADOLAN)",
         """
         # Standard (certain) params:
         params = {
-            "INPUT":      self._full_asc_filename,
+            "INPUT":      str(self._full_asc_filename),
             "SOURCE_SRS": proj_radolan,
             #"DEST_SRS":  'EPSG:3035',    # QGIS 2?
             "TARGET_CRS": 'EPSG:3035',
@@ -272,9 +271,9 @@ PROJCS["DWD (RADOLAN)",
         # out: u'2.99.0-Master'
         #>>> QgsExpressionContextUtils.globalScope().variable('qgis_version_no')    # better
         
-        """ .............................................................
-        HERE WE CAN SEND A GDAL CALL ADAPTED TO THE CORRESPONDING VERION!
-        ............................................................. """
+        """ ..............................................................
+        HERE WE CAN SEND A GDAL CALL ADAPTED TO THE CORRESPONDING VERSION!
+        .............................................................. """
         
         add_additional_keys = False
         
@@ -282,8 +281,8 @@ PROJCS["DWD (RADOLAN)",
             version = GdalUtils.version()
             
             if platform.system() == 'Windows':
-                system_name = "{} {}".format(platform.system(), platform.release())
-                raise OSError("Running on '{}'".format(system_name))
+                system_name = f"{platform.system()} {platform.release()}"
+                raise OSError(f"Running on '{system_name}'")
             
         #except AttributeError as ex:    # ex: class GdalUtils has no attribute 'version'
         except AttributeError:
@@ -296,7 +295,7 @@ PROJCS["DWD (RADOLAN)",
         
         # Nur wenn Try OK: section for determining the extent of input raster by creating layer datatype
         else:
-            self.out("GdalUtils.version is {}".format(version))
+            self.out(f"GdalUtils.version is {version}")
             # Result for
             # Dev-Version/Linux:  2010200
             # 2.18.15 Las Palmas: 2020300
@@ -454,7 +453,7 @@ PROJCS["DWD (RADOLAN)",
         clipped_tif_name = path.basename(self._full_tif_filename).replace('.tif', "_clipped.tif")
         clipped_tif_name = path.join(self._model.data_dir, clipped_tif_name)
         
-        self.out("clip_raster_by_mask('{}')".format(mask_shape))
+        self.out(f"clip_raster_by_mask('{mask_shape}')")
         
         if path.exists(clipped_tif_name):
             self.out("  removing old version of clipped TIF before creating a new one...")
@@ -470,11 +469,11 @@ PROJCS["DWD (RADOLAN)",
         processing.run("gdal:cliprasterbymasklayer", {
             'INPUT':   self._full_tif_filename,
             'MASK':    mask_shape,
-            'OPTIONS': 'COMPRESS={}'.format(compress_method),
+            'OPTIONS': f'COMPRESS={compress_method}',
             'OUTPUT':  clipped_tif_name
         })
         
-        self.out("  -> '{}'".format(clipped_tif_name))
+        self.out(f"  -> '{clipped_tif_name}'")
         
         self._full_tif_filename = clipped_tif_name    # anpassen
         

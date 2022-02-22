@@ -79,7 +79,7 @@ class DockWidget(QtWidgets.QDockWidget, WIDGET_FORM_CLASS):
         
         
         ############################
-        # Tab main action
+        # Tab "RADOLAN single mode"
         ############################
         
         folder_icon = get_icon('folder.png')
@@ -100,9 +100,9 @@ class DockWidget(QtWidgets.QDockWidget, WIDGET_FORM_CLASS):
         # connect functions:
         #self.btn_info.clicked.connect(self.open_about_dialog)
         # passing parameters to connected method only possible with keyword 'lambda':
-        self.check_cut.stateChanged.connect(lambda:self._checkbox_state_changed(self.check_cut))
-        self.check_symb.stateChanged.connect(lambda:self._checkbox_state_changed(self.check_symb))
-        self.check_rvp6tomm.stateChanged.connect(lambda:self._checkbox_state_changed(self.check_rvp6tomm))
+        self.check_cut.stateChanged.connect(lambda: self._checkbox_state_changed(self.check_cut))
+        self.check_symb.stateChanged.connect(lambda: self._checkbox_state_changed(self.check_symb))
+        self.check_rvp6tomm.stateChanged.connect(lambda: self._checkbox_state_changed(self.check_rvp6tomm))
         
         #if not self.dock.inputpath.text():
         #    #self.dock.button_box.button(QDialogButtonBox.Cancel).setEnabled(True)
@@ -194,9 +194,9 @@ class DockWidget(QtWidgets.QDockWidget, WIDGET_FORM_CLASS):
     
     def out(self, s, ok=True):
         if ok:
-            print("{}: {}".format(self, s))
+            print(f"{self}: {s}")
         else:
-            print("{}: {}".format(self, s), file=sys.stderr)
+            print(f"{self}: {s}", file=sys.stderr)
     
     
     
@@ -259,10 +259,10 @@ class DockWidget(QtWidgets.QDockWidget, WIDGET_FORM_CLASS):
                     version = self.__get_value(line)
                 elif line.startswith('email'):
                     mailadress = self.__get_value(line)
-                    mail_link= '<a href="mailto:{}">{}</a>'.format(mailadress, mailadress)
+                    mail_link = f'<a href="mailto:{mailadress}">{mailadress}</a>'
                 elif line.startswith('tracker'):
                     issue_link = self.__get_value(line)
-                    issue_tracker = '<a href="{}">{}</a>'.format(issue_link, issue_link)
+                    issue_tracker = f'<a href="{issue_link}">{issue_link}</a>'
             # for
         # with
         

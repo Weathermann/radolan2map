@@ -24,15 +24,15 @@ from LayerLoader        import LayerLoader
 
 
 class ActionTabRADOLANLoader(ActionTabBase):
-    '''
+    """
     classdocs
-    '''
+    """
     
     
     def __init__(self, iface, model, dock):
-        '''
+        """
         Constructor
-        '''
+        """
         
         super().__init__(iface, model, dock)
         
@@ -64,7 +64,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         # read previously used files and prefill combo box for the user:
         history_file = model.history_file
         if history_file.exists():
-            self.out("reading 'history file' {}".format(history_file))
+            self.out(f"reading 'history file' {history_file}")
             with open(history_file) as hf:
                 model.list_of_used_files = hf.read().splitlines()    # lines without '\n'
                 # hint: 'list_of_used_files' will be used further
@@ -195,7 +195,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         layer_def_file = self._model.plugin_dir / "example/shapes/RadarNetwork/dwd_radarnetwork.qlr"
         
         if not layer_def_file.exists():
-            self.out("layer definition file '{}' doesn't exist.".format(layer_def_file), False)
+            self.out(f"layer definition file '{layer_def_file}' doesn't exist.", False)
             return
         
         """ OK for buffer layer only:
@@ -210,7 +210,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         
         #group = root.addGroup("RadarNetwork")    # ok, appended
         group = root.insertGroup(0, layergroup_name)    # first position
-        self.out("loading layer definition file '{}'".format(layer_def_file))
+        self.out(f"loading layer definition file '{layer_def_file}'")
         QgsLayerDefinition().loadLayerDefinition(str(layer_def_file), QgsProject.instance(), group)
         
     
@@ -260,7 +260,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
     def _combo_selection_change(self):
         #file = self.dock.inputpath.text()
         file = self.dock.cbbox_radolan.currentText()
-        self.out("selection changed: '{}'".format(file))
+        self.out(f"selection changed: '{file}'")
         
         #
         # Check input file:
@@ -276,7 +276,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         if not Path(file).exists():
             super()._show_critical_message_box("The specified file doesn't exist!", 'File error')
             self._model.list_of_used_files.remove(file)
-            self.out("file '{}' removed from list".format(file))
+            self.out(f"file '{file}' removed from list")
             action_btn.setEnabled(False)
             return
         
@@ -290,12 +290,12 @@ class ActionTabRADOLANLoader(ActionTabBase):
         because IDs like 'W1'-'W4', 'D2'-'D3', 'S2'-'S3' are possible. """
         
         if is_rx:
-            self.out("*X product detected - '{}' checkbox enabled".format(self.dock.check_rvp6tomm.objectName()))
+            self.out(f"*X product detected - '{self.dock.check_rvp6tomm.objectName()}' checkbox enabled")
         self.dock.check_rvp6tomm.setVisible(is_rx)
         
         # Print info found in def-file about the product:
         prod_desc = self._model.product_description(prod_id)
-        self.out('product {}: "{}"'.format(prod_id, prod_desc))
+        self.out(f'product {prod_id}: "{prod_desc}"')
         
         #self.dock.btn_show_list.setVisible(True)
         # after selection of RADOLAN file enable action button:
@@ -317,7 +317,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         inputmaskshp = self._show_open_file_dialog("Select mask (optional)",
                             str(start_dir), "Shape file (*.shp)")
         if not inputmaskshp:
-            return    # don't delete evtl. loaded path
+            return    # don't delete possibly loaded path
         
         self.mask_file = inputmaskshp
     
@@ -327,7 +327,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         file_filter = "QGIS symbology files (*.qml*)"
         
         qml_file = self._show_open_file_dialog("Apply symbology (optional)",
-                        str(self._model.symbology_path), file_filter)
+                   str(self._model.symbology_path), file_filter)
         if not qml_file:
             return    # keep path anyway
         
@@ -412,8 +412,8 @@ class ActionTabRADOLANLoader(ActionTabBase):
         
         # at GDAL processing a lot of strange errors are possible - with projection parameters and GDAL versions...
         try:
-            # string type is important! otherwise problems with gdal.Warp()!
-            self.__create_tif_file(str(asc_filename_path), str(full_tif_filename), shape_file)
+
+            self.__create_tif_file(asc_filename_path, full_tif_filename, shape_file)
         except Exception as e:
             super()._show_critical_message_box(str(e), 'GDAL processing error')
             return
@@ -498,9 +498,9 @@ class ActionTabRADOLANLoader(ActionTabBase):
     
     
     def __read_radolan_create_ascii_file(self, radolan_file):
-        ''' raise Exception '''
+        """ raise Exception """
         
-        self.out("__read_radolan_create_ascii_file('{}')".format(radolan_file))
+        self.out(f"__read_radolan_create_ascii_file('{radolan_file}')")
         
         
         self._model.create_storage_folder_structure(temp_dir=True)    # only create tmp_dir
@@ -531,13 +531,13 @@ class ActionTabRADOLANLoader(ActionTabBase):
         # if part after point is too long:
         l_max = s_max.split('.')
         if len(l_max[1]) > 2:
-            s_max = "{:.2f}".format(_max)
+            s_max = f"{_max:.2f}"
         
         self.dock.text_filename.setText(filename)
         self.dock.text_shape.setText(dim)
         self.dock.text_max.setText(s_max)
         self.dock.text_min.setText(str(_min))
-        self.dock.text_mean.setText("{:.2f}".format(mean))
+        self.dock.text_mean.setText(f"{mean:.2f}")
         self.dock.text_total_pixels.setText(str(total))
         self.dock.text_valid_pixels.setText(str(valid))
         self.dock.text_nonvalid_pixels.setText(str(nonvalid))
@@ -562,7 +562,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
     
     
     def __create_tif_file(self, asc_file, tif_file, shape_file=None):
-        ''' raise Exception '''
+        """ raise Exception """
         
         # Parameters for 'GDALProcessing':
         
