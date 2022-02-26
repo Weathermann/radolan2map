@@ -8,8 +8,9 @@ Created on 02.12.2020
 '''
 
 from pathlib import Path
-from glob import glob
 from copy import copy
+from datetime import datetime
+import re
 
 from qgis.PyQt.QtWidgets import QFileDialog
 from qgis.PyQt.QtCore    import QDateTime
@@ -46,6 +47,7 @@ class ActionTabRADOLANAdder(ActionTabBase):
         dock.btn_select_dir_adder.clicked.connect(self._select_input_dir)
         dock.btn_scan.clicked.connect(self._scan_for_products)
         dock.btn_run_adder.clicked.connect(self._run)
+        dock.btn_set_datetime.clicked.connect(self._set_begin_end_automatically)
         dock.listWidget.itemSelectionChanged.connect(self._listwidget_selection_changed)    # itemClicked.connect
         
         
@@ -55,7 +57,8 @@ class ActionTabRADOLANAdder(ActionTabBase):
         self.dock.dateTimeEdit_end.setDateTime(copy(dt))
         
         self._prod_id = None
-        
+        self._files = None    # list of scanned RADOLAN files
+
         # for saving:
         self._begin = None
         self._end   = None
@@ -101,42 +104,47 @@ class ActionTabRADOLANAdder(ActionTabBase):
         
         scan_path = Path(self.tf_path)
         print(f"  scan path: '{scan_path}'")
-        
+
         try:
-            
-            scan_pattern = str(scan_path / 'raa01-*---bin*')    # possibly '.gz'
-            files = glob(scan_pattern)
-            
+            files = scan_path.glob('raa01-*---bin*')     # possibly '.gz'
             if not files:
+                self.dock.btn_set_datetime.setEnabled(False)
                 raise FileNotFoundError("No RADOLAN products found!")
-            
-            
-            # Detect product IDs and count:
-            
-            d_id = {}    # dict of product ids
-            # raa01-sf_10000-1501070550-dwd---bin -> 'SF'
-            for f in files:
-                _id = Path(f).name[6:8].upper()
-                if _id[1] == 'X':    # exclude RVP-products (1 Byte) like 'RX', 'WX', 'EX', ...
-                    print(f"- exclude '{_id}'")
-                    continue
-                
-                try:    # if key exist, increment
-                    d_id[_id] += 1
-                except KeyError:
-                    d_id[_id] = 1
-            # for
-            
-            l_id = []    # list of product ids
-            for k, v in d_id.items():
-                print(f"{k}: {v}")
-                if v > 1:
-                    l_id.append(k)
-            # for
-            
         except Exception as e:
             super()._show_critical_message_box(str(e))
             return
+
+        # set:
+        self._files = list(files)    # save list of Posixpath because of generator running o.o.i.
+        # sort because order of RADOLAN first and last file for setting datetime:
+        self._files.sort()
+
+        self.dock.btn_set_datetime.setEnabled(True)
+
+
+        # Detect product IDs and count:
+
+        d_id = {}  # dict of product ids
+        # raa01-sf_10000-1501070550-dwd---bin -> 'SF'
+        for f in self._files:    # of Posixpath
+            _id = f.name[6:8].upper()
+
+            if _id[1] == 'X':  # exclude RVP-products (1 Byte) like 'RX', 'WX', 'EX', ...
+                print(f"- exclude '{_id}'")
+                continue
+
+            try:  # if key exist, increment
+                d_id[_id] += 1
+            except KeyError:
+                d_id[_id] = 1
+        # for files
+
+        l_id = []  # list of product ids
+        for k, v in d_id.items():
+            print(f"{k}: {v}")
+            if v > 1:
+                l_id.append(k)
+        # for
         
         self.out(f"IDs: {l_id}")
         
@@ -145,8 +153,34 @@ class ActionTabRADOLANAdder(ActionTabBase):
         
         # again, because '_listwidget_selection_changed()' enables 'btn_run_adder':
         self.dock.btn_run_adder.setEnabled(False)
-        
-    
+
+
+    def _set_begin_end_automatically(self):
+        if not self._files:
+            raise FileNotFoundError("No RADOLAN products in list!")
+
+        first_file = self._files[0].name
+        last_file  = self._files[-1].name
+
+        # RADOLAN: ['01', '10000', '1605290050']
+        # RADKLIM: ['01', '2017', '002', '10000', '1806010050']
+        digits_begin = re.findall(r'\d+', first_file)[-1]
+        digits_end   = re.findall(r'\d+', last_file)[-1]
+
+        # save this. These are the settings with which the user executed:
+        self._begin = "20" + digits_begin
+        self._end   = "20" + digits_end
+
+        df = '%Y%m%d%H%M'
+        dt_beg = datetime.strptime(self._begin, df)
+        dt_end = datetime.strptime(self._end, df)
+        print("Begin:", dt_beg)
+        print("End:  ", dt_end)
+
+        self.dock.dateTimeEdit_beg.setDateTime(dt_beg)
+        self.dock.dateTimeEdit_end.setDateTime(dt_end)
+
+
     
     def _listwidget_selection_changed(self):
         self.dock.btn_run_adder.setEnabled(True)
@@ -370,18 +404,18 @@ class ActionTabRADOLANAdder(ActionTabBase):
     def begin(self):
         return self._begin
     @begin.setter
-    def begin(self, b):
-        self._begin = b
-        dt = QDateTime.fromString(b, df_qt)
+    def begin(self, beg):
+        self._begin = beg
+        dt = QDateTime.fromString(beg, df_qt)
         self.dock.dateTimeEdit_beg.setDateTime(dt)
     
     @property
     def end(self):
         return self._end
     @end.setter
-    def end(self, e):
-        self._end = e
-        dt = QDateTime.fromString(e, df_qt)
+    def end(self, end):
+        self._end = end
+        dt = QDateTime.fromString(end, df_qt)
         self.dock.dateTimeEdit_end.setDateTime(dt)
     
     @property
