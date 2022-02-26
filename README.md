@@ -31,8 +31,8 @@ A RADOLAN-RW-testfile (gzipped binary) is included in directory `example/sample_
 
 ### Platform info
 Plugin was successfully tested with QGIS
+*  3.16 *Hannover* on Linux openSUSE 15.3
 *  3.10 *A Coruña* on Linux openSUSE 15.1 and Windows 10
-*  3.16 *Hannover* on Linux openSUSE 15.1
 
 If you experience any problems when starting the plugin, please make sure that  
 you have a **current version of QGIS and Python installed** on your system.
