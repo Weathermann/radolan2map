@@ -180,6 +180,8 @@ class ActionTabRADOLANAdder(ActionTabBase):
         self.dock.dateTimeEdit_beg.setDateTime(dt_beg)
         self.dock.dateTimeEdit_end.setDateTime(dt_end)
 
+        self.dock.btn_set_datetime.setEnabled(False)
+
 
     
     def _listwidget_selection_changed(self):

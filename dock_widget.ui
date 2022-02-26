@@ -381,8 +381,8 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>300</x>
-        <y>430</y>
+        <x>310</x>
+        <y>410</y>
         <width>101</width>
         <height>34</height>
        </rect>
@@ -523,27 +523,14 @@
        <string>End</string>
       </property>
      </widget>
-     <widget class="Line" name="line">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>310</y>
-        <width>421</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
      <widget class="QPushButton" name="btn_scan">
       <property name="enabled">
        <bool>false</bool>
       </property>
       <property name="geometry">
        <rect>
-        <x>300</x>
-        <y>200</y>
+        <x>200</x>
+        <y>230</y>
         <width>101</width>
         <height>41</height>
        </rect>
@@ -569,10 +556,10 @@ products</string>
      <widget class="QListWidget" name="listWidget">
       <property name="geometry">
        <rect>
-        <x>70</x>
-        <y>210</y>
+        <x>120</x>
+        <y>220</y>
         <width>61</width>
-        <height>91</height>
+        <height>71</height>
        </rect>
       </property>
       <property name="toolTip">
@@ -583,7 +570,7 @@ products</string>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>170</y>
+        <y>180</y>
         <width>421</width>
         <height>20</height>
        </rect>
@@ -595,8 +582,8 @@ products</string>
      <widget class="QLabel" name="label_24">
       <property name="geometry">
        <rect>
-        <x>70</x>
-        <y>190</y>
+        <x>10</x>
+        <y>220</y>
         <width>101</width>
         <height>21</height>
        </rect>
@@ -631,7 +618,7 @@ products</string>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>330</y>
+        <y>320</y>
         <width>241</width>
         <height>51</height>
        </rect>
@@ -655,9 +642,9 @@ products</string>
       <property name="geometry">
        <rect>
         <x>280</x>
-        <y>330</y>
+        <y>310</y>
         <width>161</width>
-        <height>91</height>
+        <height>101</height>
        </rect>
       </property>
       <property name="font">
@@ -681,8 +668,8 @@ products</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>300</x>
-        <y>260</y>
+        <x>330</x>
+        <y>230</y>
         <width>101</width>
         <height>41</height>
        </rect>
@@ -693,7 +680,7 @@ products</string>
        </font>
       </property>
       <property name="toolTip">
-       <string/>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;set start/end limit found&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
        <string>set begin / end
