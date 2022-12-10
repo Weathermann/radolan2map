@@ -478,7 +478,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         if self.dock.check_excl_zeroes.isChecked():
             ll.no_zeros = True    # Set 0 values to NODATA (= transparent)
         
-        ll.load_raster(full_tif_filename, qml_file)
+        ll.load_raster(full_tif_filename, qml_file, temporal=True)
         
         
         #self.dock.button_box.button(QDialogButtonBox.Apply).setEnabled(False)

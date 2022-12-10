@@ -27,12 +27,12 @@ import sys
 import json
 
 # Import the PyQt and QGIS libraries
-from qgis.core import QgsProject
-from qgis.PyQt.QtCore import Qt, QCoreApplication, QSettings, QTranslator, QSize   #, QRect
+# from qgis.core import QgsProject
+from qgis.PyQt.QtCore import Qt, QCoreApplication, QSettings, QTranslator, QSize  # , QRect
 from qgis.PyQt.QtWidgets import QMessageBox, QDockWidget, QAction
 from qgis.PyQt.QtGui import QIcon
 # Initialize Qt resources from file resources.py
-#from .resources import *
+# from .resources import *
 from console import console    # show python console automatically
 
 # Eigene Klassen
@@ -51,7 +51,7 @@ from SettingsTab            import SettingsTab
 
 class Radolan2Map:
     """ QGIS Plugin Implementation. """
-    
+
     def __init__(self, iface):
         """Constructor.
         :param iface: An interface instance that will be passed to this class
@@ -59,16 +59,16 @@ class Radolan2Map:
             application at run time.
         :type iface: QgsInterface
         """
-        
+
         # Save reference to the QGIS interface
         self.iface = iface
-        
-        
+
+
         # initialize plugin directory
         self.plugin_dir = Path(__file__).parent
-        
+
         # initialize locale
-        # Bugfix: on Windows 10 and QGIS 3.6 Noosa occured a TypeError.
+        # Bugfix: on Windows 10 and QGIS 3.6 Noosa occurred a TypeError.
         # The reason could be, that there are no translation files.
         try:
             locale = QSettings().value('locale/userLocale')[0:2]
@@ -76,12 +76,12 @@ class Radolan2Map:
             self.out(e, False)    # TypeError: 'QVariant' object is not subscriptable
         else:
             locale_path = self.plugin_dir / 'i18n' / 'Radolan2Map_{}.qm'.format(locale)
-            
+
             if locale_path.exists():
                 self.translator = QTranslator()
                 self.translator.load(locale_path)
                 QCoreApplication.installTranslator(self.translator)
-        
+
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&radolan2map')
@@ -89,34 +89,33 @@ class Radolan2Map:
         self.toolbar = self.iface.addToolBar(u'Radolan2Map')
         self.toolbar.setObjectName(u'Radolan2Map')
 
-        
+
         self._model = Model()
-        
+
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         # Create the dialog (after translation) and keep reference
         self.dock = None
-        
+
         # Action Tabs (each has it's own logic):
         self._actiontab_radolan = None
         self._actiontab_adder   = None
         self._actiontab_regnie  = None
         self._settings_tab      = None
-        
-    
-    
+
+
+
     def __str__(self):
         return self.__class__.__name__
-    
-    
+
+
     def out(self, s, ok=True):
         if ok:
             print("{}: {}".format(self, s))
         else:
             print("{}: {}".format(self, s), file=sys.stderr)
-    
-    
-    
+
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -131,7 +130,7 @@ class Radolan2Map:
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('Radolan2Map', message)
-    
+
     def add_action(
         self,
         icon_path,
@@ -165,15 +164,15 @@ class Radolan2Map:
                 action)
 
         self.actions.append(action)
-        
+
         return action
-    
-    
-    
+
+
+
     def initGui(self):
         """ Create the menu entries and toolbar icons inside the QGIS GUI. """
-        
-        
+
+
         """
         note the icon path:
         ':/plugins/my_plugin/icon.png'.
@@ -182,28 +181,28 @@ class Radolan2Map:
         """
         #icon_path = ':/plugins/radolan2map/icon.png'
         icon_path = Path(__file__).parent / "img/icon.png"
-        
+
         if not icon_path.exists():
             self.out("icon '{}' not found!".format(icon_path), False)
-        
+
         self.add_action(
             str(icon_path),
             text=self.tr(u'radolan2map: load a RADOLAN binary file'),    # tooltip over plugin icon
             callback=self.open_dock,
             parent=self.iface.mainWindow())
-    
+
 
     
-    
+
     def open_dock(self):
         """
         This method will be called when you click the toolbar button or select the plugin menu item.
         """
-        
+
         # Try to catch every Exception and show it in a graphical window.
         try:
-            
-            
+
+
             # Show the output of the plugin:
             #console.show_console()    # works but better:
             pythonConsole = self.iface.mainWindow().findChild( QDockWidget, 'PythonConsole' )
@@ -213,23 +212,23 @@ class Radolan2Map:
             except AttributeError:    # can be 'None' above
                 console.show_console()
                 self.out("PythonConsole Error catched", False)
-            
-            
+
+
             self.out("open_dock()")
-            
-            
+
+
             # Test for catching a exception and show this to the user by a window:
             #raise RuntimeWarning("manual exception raised")
-            
-            
+
+
             # Create the dialog with elements (after translation) and keep reference
             # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-            
+
             # dockwidget may not exist if:
             #    first run of plugin
             #    removed on close (see self.onClosePlugin method)
-            
-            
+
+
             # Close dock via toolbar button:
             if self.dock:
                 if self.dock.isVisible():
@@ -251,16 +250,16 @@ class Radolan2Map:
                     # check file must be removed now:
                     self._model.check_file.unlink()
                     self.out("check file '{}' removed, message doesn't appear again.".format(self._model.check_file))
-                    
+
                     msg = "It's recommended to exit QGIS now.\n\nExit QGIS?"
                     reply = QMessageBox.question(self.iface.mainWindow(), 'Continue?',
                                                  msg, QMessageBox.Yes, QMessageBox.No)
                     if reply == QMessageBox.Yes:
                         self.iface.actionExit().trigger()
-                        return    # maybe unneccessary
+                        return    # maybe unnecessary
                 # if
                 self._init_dock()
-                
+
                 news_file = self._model.news_file
                 try:
                     with news_file.open() as f:
@@ -277,12 +276,12 @@ class Radolan2Map:
                     news_file.unlink()
                     self.out("news file '{}' removed, message doesn't appear again.".format(news_file))
             # else
-            
-            
-            
+
+
+
             self._settings_tab.update_projection_based_on_current_project()
-            
-            
+
+
             """
             DockWidget exists but maybe it's invisible
             Bring DockWidget to front (maybe it's minimized elsewhere...)
@@ -292,42 +291,42 @@ class Radolan2Map:
             # that's fine - if necessary, get the initialized values from the .ui:
             self.dock.setMinimumSize(QSize(width, height))    # width, height
             # -> prevents a too small Widget
-            
-            
+
+
             # show the dockwidget
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock)
             self.dock.show()
             # Ohne diese Anweisung wurde das Fenster ab QGIS3 im Hintergrund geöffnet.
             #self.dock.setWindowFlags(Qt.WindowStaysOnTopHint)
-            
-            
+
+
         except Exception as e:
             l_msg = ["{}\n\n".format(e)]
             l_msg.append("If this error persists - even after restarting QGIS - it may be")
             l_msg.append(" helpful to update your QGIS / Python installation")
             l_msg.append(" and working with a new QGIS user profile.")
             l_msg.append("\nIf nothing helps, please write a bug report.")
-            
+
             msg = "".join(l_msg)
             self.out(msg, False)
             QMessageBox.critical(self.iface.mainWindow(), 'Exception catched', msg)
             #raise    # for tests, for output of precise line number
-        
-    
-    
+
+
+
     def _init_dock(self):
         '''
-        Everything that is neccessary for setup up the DockWidget.
+        Everything that is necessary for setup up the DockWidget.
         '''
-        
+
         # Create the dockwidget (after translation) and keep reference
         self.dock = DockWidget()
-        
+
         # connect to provide cleanup on closing of dockwidget
         self.dock.closingPlugin.connect(self.onClosePlugin)
-        
-        
-        
+
+
+
         """
         resets / defaults
         """
@@ -440,7 +439,7 @@ class Radolan2Map:
 
         # remove this statement if dockwidget is to remain
         # for reuse if plugin is reopened
-        # Commented next statement since it causes QGIS crashe
+        # Commented next statement since it causes QGIS crashs
         # when closing the docked window:
         # self.dock = None
     

@@ -8,7 +8,7 @@ Applications: hydrometeorological and agricultural analyses.
 load the following data types:
 - load/display any binary file in RADOLAN / RADKLIM format (incl. gz-compression)
 - radolan summation: you can add up RADOLAN data!
-- rudimentary REGNIE support
+- daily, monthly and multiannual REGNIE files (incl. gz-compression)
 
 additional functions for RADOLAN:
 - bring it to standard projection [ETRS89 / LAEA Europe](https://epsg.io/3035)
@@ -21,17 +21,21 @@ additional functions for RADOLAN:
   
 
 ### Data info
-* RADOLAN overview: [https://dwd.de/RADOLAN](https://dwd.de/RADOLAN)
-* data download: RADOLAN (recent) and RADKLIM radar climatology dataset:
+#### RADOLAN
+* Overview: [https://dwd.de/RADOLAN](https://dwd.de/RADOLAN). There are hourly (RH, RW) or daily (SF) datasets.  
+  A RADOLAN-RW-testfile (gzipped binary) is included in directory `example/sample_file/`.
+* Data download: RADOLAN (recent) and RADKLIM radar climatology dataset:
   [DWD open climate data](https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/)
-
-There are hourly (RH, RW) or daily (SF) datasets.  
-A RADOLAN-RW-testfile (gzipped binary) is included in directory `example/sample_file/`.
-  
+#### REGNIE
+* REGNIE overview: https://www.dwd.de/DE/leistungen/regnie/regnie.html
+* Data download:
+  * [REGNIE daily data](https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/regnie/)
+  * [REGNIE monthly data](https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/regnie/)
+  * [REGNIE multiannual data](https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/regnie/)
 
 ### Platform info
 Plugin was successfully tested with QGIS
-*  3.16 *Hannover* on Linux openSUSE 15.3
+*  3.16 *Hannover* on Linux openSUSE 15.3 and Windows 10
 *  3.10 *A Coruña* on Linux openSUSE 15.1 and Windows 10
 
 If you experience any problems when starting the plugin, please make sure that  

@@ -317,10 +317,12 @@ class ActionTabRADOLANAdder(ActionTabBase):
 
 
         ll = LayerLoader(self._iface)    # 'iface' is from 'radolan2map'
+
         if dock.check_excl_zeroes.isChecked():
             ll.no_zeros = True  # Set 0 values to NODATA (= transparent)
 
-        ll.load_raster(tif_file, qml_file)
+        ll.load_raster(tif_file, qml_file, temporal=False)
+
         
         dock.btn_run_adder.setEnabled(True)    # re-activate
         
