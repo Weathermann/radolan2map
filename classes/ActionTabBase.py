@@ -44,9 +44,9 @@ class ActionTabBase:
     
     def out(self, s, ok=True):
         if ok:
-            print("{}: {}".format(self, s))
+            print(f"{self}: {s}")
         else:
-            print("{}: {}".format(self, s), file=sys.stderr)
+            print(f"{self}: {s}", file=sys.stderr)
         
     
     

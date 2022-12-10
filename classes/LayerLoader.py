@@ -29,12 +29,12 @@ class LayerLoader:
     """
     classdocs
     """
-
+    
     def __init__(self, iface):
         """
         Constructor
         """
-
+        
         print(self)
 
         self._iface = iface
@@ -48,23 +48,26 @@ class LayerLoader:
 
     def out(self, s, ok=True):
         if ok:
-            print("{}: {}".format(self, s))
+            print(f"{self}: {s}")
         else:
-            print("{}: {}".format(self, s), file=sys.stderr)
+
+            print(f"{self}: {s}", file=sys.stderr)
+
 
     def _show_message(self, qgis_state, layer_name, duration):
 
         if qgis_state == Qgis.Success:
             title = "Success"
-            msg = "Layer '{}' loaded!".format(layer_name)
+            msg = f'Layer "{layer_name}" loaded!'
         else:
             title = "Error"
-            msg = "Layer '{}' failed to load!".format(layer_name)
+            msg = f'Layer "{layer_name}" failed to load!'
             self.out(msg, False)
-
-        self._iface.messageBar().pushMessage(
-            title, msg, level=qgis_state, duration=duration
-        )
+        
+        self._iface.messageBar().pushMessage(title, msg, level=qgis_state, duration=duration)
+    
+    
+    
 
     def load_raster(self, tif_file, qml_file=None, temporal=False):
 
@@ -138,10 +141,10 @@ class LayerLoader:
         # -> was working, simpler variant:
         # uri = "{}{}?delimiter=,&xField=LON&yField=LAT".format('file:///', regnie_csv_file)
         # but not on Windows - needs crs specified:
-        uri = "{}{}?delimiter=,&xField=LON&yField=LAT&crs=EPSG:4326".format(
-            "file:///", csv_file
-        )
-        self.out("uri: {}".format(uri))
+
+        uri = f"file:///{csv_file}?delimiter=,&xField=LON&yField=LAT&crs=EPSG:4326"
+        self.out(f"uri: {uri}")
+
 
         # Make a vector layer:
         csv_layer = QgsVectorLayer(uri, csv_file.name, "delimitedtext")
@@ -160,11 +163,9 @@ class LayerLoader:
         layers = QgsProject.instance().mapLayersByName(layer_name)
 
         for layer in layers:
-            self.out(
-                'Layer with existing name "{}" found - removing.'.format(layer.name())
-            )
+            self.out(f'Layer with existing name "{layer.name()}" found - removing.')
             QgsProject.instance().removeMapLayer(layer.id())
-
+    
     def _insert_layer(self, layer, qml_file, duration):
 
         # Build pyramids
@@ -186,6 +187,7 @@ class LayerLoader:
             # layer.setLayerTransparency(40)    # %    this method seems only be available for vector layer
             layer.setOpacity(opa)
 
+
         # Set zero values to transparent
         if self._no_zeros:
             self._set_zeroes_invisible(layer)
@@ -194,6 +196,7 @@ class LayerLoader:
         if self.temporal and Qgis.QGIS_VERSION_INT >= 31400:
             self.out("Setting temporal settings ...")
             self._set_time_range(layer)
+
 
         # Insert layer at a certain position
 
@@ -232,13 +235,14 @@ class LayerLoader:
         """
         @param raster_layer: QgsRasterLayer
         """
+        
+        self.out(f"using QML file '{qml_file}'")
+        
+        #if layer.geometryType() == QGis.Point:
+        layer.loadNamedStyle(str(qml_file))    # str() if Path
+        
+        #if hasattr(raster_layer, "setCacheImage"):    # OK, 09.12.2020
 
-        self.out("using QML file '{}'".format(qml_file))
-
-        # if layer.geometryType() == QGis.Point:
-        layer.loadNamedStyle(str(qml_file))  # str() if Path
-
-        # if hasattr(raster_layer, "setCacheImage"):    # OK, 09.12.2020
         try:
             layer.setCacheImage(None)
         except AttributeError:

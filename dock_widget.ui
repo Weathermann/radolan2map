@@ -23,7 +23,7 @@
    <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable</set>
   </property>
   <property name="windowTitle">
-   <string>&amp;radolan2map</string>
+   <string>radolan2map</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <widget class="QTabWidget" name="tabWidget">
@@ -42,7 +42,7 @@
      <string/>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_action">
      <attribute name="icon">
@@ -50,7 +50,7 @@
        <normaloff>img/execute.png</normaloff>img/execute.png</iconset>
      </attribute>
      <attribute name="title">
-      <string>Load RADOLAN file</string>
+      <string>RADOLAN single mode</string>
      </attribute>
      <attribute name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;load a RADOLAN binary file&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -370,7 +370,7 @@
        <normaloff>img/stack.png</normaloff>img/stack.png</iconset>
      </attribute>
      <attribute name="title">
-      <string>RADOLANAdder</string>
+      <string>RADOLAN sum mode</string>
      </attribute>
      <attribute name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;create a RADOLAN sum product&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -381,7 +381,7 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>300</x>
+        <x>310</x>
         <y>410</y>
         <width>101</width>
         <height>34</height>
@@ -407,10 +407,10 @@
      <widget class="QPushButton" name="btn_select_dir_adder">
       <property name="geometry">
        <rect>
-        <x>380</x>
-        <y>120</y>
-        <width>51</width>
-        <height>41</height>
+        <x>390</x>
+        <y>130</y>
+        <width>41</width>
+        <height>31</height>
        </rect>
       </property>
       <property name="toolTip">
@@ -425,8 +425,8 @@
       </property>
       <property name="iconSize">
        <size>
-        <width>32</width>
-        <height>32</height>
+        <width>16</width>
+        <height>16</height>
        </size>
       </property>
      </widget>
@@ -434,9 +434,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>120</y>
-        <width>361</width>
-        <height>41</height>
+        <y>130</y>
+        <width>371</width>
+        <height>31</height>
        </rect>
       </property>
      </widget>
@@ -444,37 +444,13 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>100</y>
-        <width>361</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose folder with extracted RADOLAN files&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-      </property>
-      <property name="wordWrap">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_21">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>170</y>
+        <y>90</y>
         <width>421</width>
-        <height>21</height>
+        <height>41</height>
        </rect>
       </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt; color:#ff0000;&quot;&gt;There must be at least 2 files of a product type and they have to be extracted!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose folder with extracted RADOLAN files&lt;br/&gt;&lt;span style=&quot; font-size:8pt; color:#ff0000;&quot;&gt;There must be at least 2 files of a product type and they have to be extracted!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -547,27 +523,14 @@
        <string>End</string>
       </property>
      </widget>
-     <widget class="Line" name="line">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>320</y>
-        <width>421</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
      <widget class="QPushButton" name="btn_scan">
       <property name="enabled">
        <bool>false</bool>
       </property>
       <property name="geometry">
        <rect>
-        <x>300</x>
-        <y>250</y>
+        <x>200</x>
+        <y>230</y>
         <width>101</width>
         <height>41</height>
        </rect>
@@ -593,10 +556,10 @@ products</string>
      <widget class="QListWidget" name="listWidget">
       <property name="geometry">
        <rect>
-        <x>70</x>
-        <y>230</y>
+        <x>120</x>
+        <y>220</y>
         <width>61</width>
-        <height>91</height>
+        <height>71</height>
        </rect>
       </property>
       <property name="toolTip">
@@ -607,7 +570,7 @@ products</string>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>190</y>
+        <y>180</y>
         <width>421</width>
         <height>20</height>
        </rect>
@@ -619,8 +582,8 @@ products</string>
      <widget class="QLabel" name="label_24">
       <property name="geometry">
        <rect>
-        <x>70</x>
-        <y>210</y>
+        <x>10</x>
+        <y>220</y>
         <width>101</width>
         <height>21</height>
        </rect>
@@ -655,9 +618,9 @@ products</string>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>340</y>
-        <width>421</width>
-        <height>31</height>
+        <y>320</y>
+        <width>241</width>
+        <height>51</height>
        </rect>
       </property>
       <property name="font">
@@ -666,13 +629,68 @@ products</string>
        </font>
       </property>
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Please make sure that you match the minute of the &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;start date&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; with the&lt;br/&gt;RADOLAN product to be added up so that the data can be found.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Please make sure that you match the minute of the &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;start date&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; with the RADOLAN product to be added up so that the data can be found.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
       </property>
       <property name="wordWrap">
        <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_26">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>310</y>
+        <width>161</width>
+        <height>101</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Before run, please check:&lt;br/&gt;&amp;quot;RADOLAN sum mode&amp;quot; &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600; color:#ff0000;&quot;&gt;shares settings&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; together with &amp;quot;RADOLAN single mode&amp;quot; (clipping, custom colors, see left tab)!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_set_datetime">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>230</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;set start/end limit found&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>set begin / end
+automatically</string>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
       </property>
      </widget>
     </widget>

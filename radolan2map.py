@@ -336,13 +336,13 @@ class Radolan2Map:
         ############################
         
         # add instances of 'iface', 'Model', 'gui' (dock):
-        self._settings_tab      = SettingsTab(self.iface, self._model, self.dock)
+        self._settings_tab = SettingsTab(self.iface, self._model, self.dock)
         
         # Try to setup the data folder, but maybe the def file does not exist yet:
         data_dir_unset = False
         try:
             self._settings_tab.storage_dir = self._model.data_root
-            self.out("'data dir def file' found:\n  {}".format(self._model.data_root_def_file))
+            self.out(f"'data dir def file' found:\n  {self._model.data_root_def_file}")
         except FileNotFoundError:
             data_dir_unset = True
             self.out("'data dir def file' not found -> init")
@@ -378,7 +378,7 @@ class Radolan2Map:
         
         try:
             
-            self.out("reading settings from '{}'".format(settings_file))
+            self.out(f"reading settings from '{settings_file}'")
             with open(settings_file) as json_file:
                 settings = json.load(json_file)
                 
@@ -422,7 +422,7 @@ class Radolan2Map:
             # with
         
         except FileNotFoundError:
-            self.out("settings file '{}' doesn't exist yet.".format(settings_file))
+            self.out(f"settings file '{settings_file}' doesn't exist yet.")
         
         # tab index somehow set:
         if tab_index > -1:
