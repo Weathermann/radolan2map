@@ -3,13 +3,12 @@
 import os
 import subprocess
 import platform
-import psutil
 
 
 def test_print_platform():
     print(platform.platform())
     print("Cores:", os.cpu_count())
-    mem = psutil.virtual_memory().total  # total physical memory in Bytes
+    mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")  # total physical memory in Bytes
     print("Mem:", mem)
     
 def test_system():
