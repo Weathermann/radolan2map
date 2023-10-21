@@ -24,10 +24,10 @@ from qgis.core import QgsApplication, QgsProject, QgsVectorLayer
 from qgis.core import QgsCoordinateReferenceSystem, QgsLayerTreeGroup
 
 
-from NumpyRadolanReader import NumpyRadolanReader
+from .NumpyRadolanReader import NumpyRadolanReader
 
-import def_products       # File 'def_products.py'
-import def_projections    # File 'def_projections.py'
+from . import def_products       # File 'def_products.py'
+from . import def_projections    # File 'def_projections.py'
 CONFIG_NAME = "config.ini"
 
 

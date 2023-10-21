@@ -23,7 +23,7 @@ import numpy as np
 from osgeo import gdal
 from osgeo import osr
 
-from Regnie import Regnie
+from .Regnie import Regnie
 
 def regnie2raster(file_regnie: Path, file_raster: Path) -> None:
     """
