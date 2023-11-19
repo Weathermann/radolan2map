@@ -7,28 +7,24 @@ name=radolan2map
 qgisMinimumVersion=3.0
 # short text which describes the plugin, no HTML allowed:
 description=Brings DWD precipitation products like RADOLAN, RADKLIM and REGNIE onto a map
-version=1.6
+version=1.7
 author=Weatherman
 email=radolan2map@e.mail.de
 
 # more detailed description:
-about=This QGIS plugin brings precipitation data from German Meteorological Service (DWD, https://www.dwd.de) - radar data in RADOLAN/RADKLIM binary format in any grid dimension as well as REGNIE - on a map  
+about=This QGIS plugin brings precipitation radar data from German Meteorological Service (DWD, https://www.dwd.de) in RADOLAN/RADKLIM binary format in any grid dimension as well as REGNIE on a map  
   You also can **add** up RADOLAN data!  
   Applications: hydrometeorological and agricultural analyses.  
   
   RADOLAN overview: https://dwd.de/RADOLAN  
   RADOLAN data (recent): https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/bin  
   RADKLIM data (radar climatology): https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/reproc/2017_002/bin  
+  Radar products on DWD Open Data: https://opendata.dwd.de/weather/radar/composit/  
   
   A RADOLAN-RW-testfile (gzipped binary) is included in directory 'example/sample_file/'.
-  
-  REGNIE overview: https://www.dwd.de/DE/leistungen/regnie/regnie.html
-  REGNIE daily data: https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/regnie/
-  REGNIE monthly data: https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/regnie/
-  REGNIE multiannual data: https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/regnie/
 
-  The plugin was successfully tested with QGIS 3.16  
-  on Windows 10, Linux openSUSE 15.1  
+  The plugin was successfully tested with QGIS 3.18 and 3.22  
+  on Windows 10, Linux openSUSE 15.3  
     
   Please restart QGIS after updating the plugin!  
   
@@ -47,6 +43,15 @@ hasProcessingProvider=no
 # Uncomment the following line and add your changelog:
 # string, can be multiline, no HTML allowed
 changelog=
+  1.7, 2023-01-23: 
+    * Functionality - new products: display of the
+      - HG product (precipitation type): https://opendata.dwd.de/weather/radar/composit/hg/
+      - WN product (reflectivity product): https://opendata.dwd.de/weather/radar/composit/wn/
+      - bzip2 format is now readable directly ('HG'), not 'tar.bz2' ('WN')
+    * Projection
+      - ASCIIGridWriter: added projection for WN (lower left corner)
+      - added projection for stereographic projection based on WGS ellipsoid (POLARA products)
+    * correction: german radar network: radius 150 km
   1.6, 2021-12-04: 
     - REGNIE files are now converted to GeoTIFF rasters instead of CSV
   1.5, 2021-02-26: Bugfix version

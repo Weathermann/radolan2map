@@ -269,7 +269,7 @@ class ActionTabRADOLANAdder(ActionTabBase):
         
         try:
             # no cleaning temp, so we can check the temp result after running:
-            self._model.create_storage_folder_structure(temp_dir=True)
+            self._model.create_storage_folder_structure(use_temp_dir=True)
             
             adder = NumpyRadolanAdder(dt_beg, dt_end, self.tf_path, self._prod_id, asc_filename_path)
             adder.run()

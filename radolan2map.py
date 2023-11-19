@@ -8,7 +8,7 @@ A QGIS plugin to bring a RADOLAN binary file onto a map.
 class: radolan2map
 Main controller
 
-changed: 2020-12
+changed: 2023
 created: 2019-09
 email  : radolan2map@e.mail.de
 
@@ -73,7 +73,7 @@ class Radolan2Map:
         except TypeError as e:
             self.out(e, False)    # TypeError: 'QVariant' object is not subscriptable
         else:
-            locale_path = self.plugin_dir / 'i18n' / 'Radolan2Map_{}.qm'.format(locale)
+            locale_path = self.plugin_dir / 'i18n' / f'Radolan2Map_{locale}.qm'
 
             if locale_path.exists():
                 self.translator = QTranslator()
@@ -109,9 +109,9 @@ class Radolan2Map:
 
     def out(self, s, ok=True):
         if ok:
-            print("{}: {}".format(self, s))
+            print(f"{self}: {s}")
         else:
-            print("{}: {}".format(self, s), file=sys.stderr)
+            print(f"{self}: {s}", file=sys.stderr)
 
 
     # noinspection PyMethodMayBeStatic
@@ -166,10 +166,8 @@ class Radolan2Map:
         return action
 
 
-
     def initGui(self):
         """ Create the menu entries and toolbar icons inside the QGIS GUI. """
-
 
         """
         note the icon path:
@@ -181,7 +179,7 @@ class Radolan2Map:
         icon_path = Path(__file__).parent / "img/icon.png"
 
         if not icon_path.exists():
-            self.out("icon '{}' not found!".format(icon_path), False)
+            self.out(f"icon '{icon_path}' not found!", False)
 
         self.add_action(
             str(icon_path),
@@ -190,8 +188,6 @@ class Radolan2Map:
             parent=self.iface.mainWindow())
 
 
-    
-
     def open_dock(self):
         """
         This method will be called when you click the toolbar button or select the plugin menu item.
@@ -199,8 +195,6 @@ class Radolan2Map:
 
         # Try to catch every Exception and show it in a graphical window.
         try:
-
-
             # Show the output of the plugin:
             #console.show_console()    # works but better:
             pythonConsole = self.iface.mainWindow().findChild( QDockWidget, 'PythonConsole' )
@@ -211,13 +205,10 @@ class Radolan2Map:
                 console.show_console()
                 self.out("PythonConsole Error catched", False)
 
-
             self.out("open_dock()")
-
 
             # Test for catching a exception and show this to the user by a window:
             #raise RuntimeWarning("manual exception raised")
-
 
             # Create the dialog with elements (after translation) and keep reference
             # Only create GUI ONCE in callback, so that it will only load when the plugin is started
@@ -225,7 +216,6 @@ class Radolan2Map:
             # dockwidget may not exist if:
             #    first run of plugin
             #    removed on close (see self.onClosePlugin method)
-
 
             # Close dock via toolbar button:
             if self.dock:
@@ -241,13 +231,13 @@ class Radolan2Map:
                 a one time check file (deleted after the following message).
                 """
                 if self._model.check_file.exists():
-                    msg = "After reinstalling the plugin QGIS should be restarted now,\n"\
-                    " otherwise plugin errors are to be expected!"
+                    msg = ("After reinstalling the plugin QGIS should be restarted now,\n"
+                           " otherwise plugin errors are to be expected!")
                     QMessageBox.warning(self.iface.mainWindow(), 'initialize plugin', msg)
                     # Message should only appear one time, so the
                     # check file must be removed now:
                     self._model.check_file.unlink()
-                    self.out("check file '{}' removed, message doesn't appear again.".format(self._model.check_file))
+                    self.out(f"check file '{self._model.check_file}' removed, message doesn't appear again.")
 
                     msg = "It's recommended to exit QGIS now.\n\nExit QGIS?"
                     reply = QMessageBox.question(self.iface.mainWindow(), 'Continue?',
@@ -272,13 +262,10 @@ class Radolan2Map:
                     pass
                 else:
                     news_file.unlink()
-                    self.out("news file '{}' removed, message doesn't appear again.".format(news_file))
+                    self.out(f"news file '{news_file}' removed, message doesn't appear again.")
             # else
 
-
-
             self._settings_tab.update_projection_based_on_current_project()
-
 
             """
             DockWidget exists but maybe it's invisible
@@ -290,16 +277,14 @@ class Radolan2Map:
             self.dock.setMinimumSize(QSize(width, height))    # width, height
             # -> prevents a too small Widget
 
-
             # show the dockwidget
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock)
             self.dock.show()
             # Ohne diese Anweisung wurde das Fenster ab QGIS3 im Hintergrund geöffnet.
             #self.dock.setWindowFlags(Qt.WindowStaysOnTopHint)
 
-
         except Exception as e:
-            l_msg = ["{}\n\n".format(e)]
+            l_msg = [f"{e}\n\n"]
             l_msg.append("If this error persists - even after restarting QGIS - it may be")
             l_msg.append(" helpful to update your QGIS / Python installation")
             l_msg.append(" and working with a new QGIS user profile.")
@@ -310,20 +295,16 @@ class Radolan2Map:
             QMessageBox.critical(self.iface.mainWindow(), 'Exception catched', msg)
             #raise    # for tests, for output of precise line number
 
-
-
     def _init_dock(self):
-        '''
+        """
         Everything that is necessary for setup up the DockWidget.
-        '''
+        """
 
         # Create the dockwidget (after translation) and keep reference
         self.dock = DockWidget()
 
         # connect to provide cleanup on closing of dockwidget
         self.dock.closingPlugin.connect(self.onClosePlugin)
-
-
 
         """
         resets / defaults
@@ -344,16 +325,10 @@ class Radolan2Map:
         except FileNotFoundError:
             data_dir_unset = True
             self.out("'data dir def file' not found -> init")
-        
-        
+
         self._actiontab_radolan = ActionTabRADOLANLoader(self.iface, self._model, self.dock)
-        
         self._actiontab_adder   = ActionTabRADOLANAdder(self.iface, self._model, self.dock)
-        
         self._actiontab_regnie  = ActionTabRegnie(self.iface, self._model, self.dock)
-        
-        
-        
         
         tab_index = -1    # unset
         
@@ -364,9 +339,7 @@ class Radolan2Map:
             self.dock.tabWidget.setTabEnabled(self.dock.TAB_RADOLAN_LOADER, False)
             self.dock.tabWidget.setTabEnabled(self.dock.TAB_RADOLAN_ADDER, False)
             self.dock.tabWidget.setTabEnabled(self.dock.TAB_REGNIE, False)    # disable also tab "REGNIE"
-            tab_index = self.dock.TAB_SETTINGS    # tab for define storage folder
-        
-        
+            tab_index = self.dock.TAB_SETTINGS    # tab to define storage folder
         
         """
         Load settings from file
@@ -375,7 +348,6 @@ class Radolan2Map:
         settings_file = self._model.settings_file
         
         try:
-            
             self.out(f"reading settings from '{settings_file}'")
             with open(settings_file) as json_file:
                 settings = json.load(json_file)
@@ -425,9 +397,7 @@ class Radolan2Map:
         # tab index somehow set:
         if tab_index > -1:
             self.dock.tab_index = tab_index
-            
-        
-        
+
     
     def onClosePlugin(self):
         """ Cleanup necessary items here when plugin dockwidget is closed """
@@ -455,8 +425,7 @@ class Radolan2Map:
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-        
-        
+
         # Plugin (Dock) never initialized - nothing to do - otherwise access to None-types:
         if not self.dock:
             return
@@ -468,8 +437,7 @@ class Radolan2Map:
         save used files for suggestion to the user at next start
         """
         self._model.write_history_file()
-        
-        
+
         """
         save program settings
         """
@@ -506,6 +474,4 @@ class Radolan2Map:
         
         with open(self._model.settings_file, 'w') as json_file:
             json.dump(settings, json_file, indent=4)
-    
-    
     

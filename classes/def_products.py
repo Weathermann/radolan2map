@@ -92,7 +92,7 @@ dict_titles = {
     "W4": "30d-Niederschlagssumme basierend auf RW-Produkt",
     'YW': "quasi-angeeichte 5-Minuten-Niederschlagsraten (RY nach Skalierung mit dem Quasianeichungsfaktor berechnet aus Verhältnis RW zu RH)",
     
-    # X-products - in RVP6 units
+    # X-products - in RVP6 units:
     'RX': "Radardaten ohne Korrektur (in RVP6-Units)",
     'WX': "Qualitätsgeprüfte Radardaten (in RVP6-Units)",
     'EX': "Europäische Radardaten (in RVP6-Units)",
@@ -106,5 +106,8 @@ dict_titles = {
     "BQ": "Mittlerer Jahreszeit-R-Faktor [kJm2*mm/h]",
     "BM": "Mittlerer Monats-R-Faktor [kJm2*mm/h]",
     "BY": "R-Faktor (Jahressumme) [kJm2*mm/h]",
-}
 
+    # Not RADOLAN:
+    "HG": "Deutschlandkomposit der Niederschlagsart in 2m Höhe über Grund",
+    "WN": "Deutschlandkomposit der Reflektivität",
+}

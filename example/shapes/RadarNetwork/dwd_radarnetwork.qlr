@@ -2,10 +2,10 @@
 <qlr>
   <layer-tree-group name="" checked="Qt::Checked" expanded="1">
     <customproperties/>
-    <layer-tree-layer providerKey="ogr" name="radarloc" source="/home/loki/.var/app/org.qgis.qgis/data/QGIS/QGIS3/profiles/default/python/plugins/radolan2map/example/shapes/RadarNetwork/radarloc.gpkg|layername=radarloc" checked="Qt::Checked" id="radarloc_70193abd_ed6e_4ee2_b9a7_33e113689078" expanded="1">
+    <layer-tree-layer providerKey="ogr" name="radarloc" source="./shapes/RadarNetwork/radarloc.gpkg|layername=radarloc" checked="Qt::Checked" id="radarloc_70193abd_ed6e_4ee2_b9a7_33e113689078" expanded="1">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer providerKey="ogr" name="radarbuffer_150km" source="/home/loki/.var/app/org.qgis.qgis/data/QGIS/QGIS3/profiles/default/python/plugins/radolan2map/example/shapes/RadarNetwork/radarbuffer_150km.gpkg|layername=radarbuffer_150km" checked="Qt::Checked" id="radarbuffer_150km_b2cd4677_7335_4cbc_9ec2_b86e0aea44b2" expanded="1">
+    <layer-tree-layer providerKey="ogr" name="radarbuffer_150km" source="./shapes/RadarNetwork/radarbuffer_150km.gpkg|layername=radarbuffer_150km" checked="Qt::Checked" id="radarbuffer_150km_b2cd4677_7335_4cbc_9ec2_b86e0aea44b2" expanded="1">
       <customproperties/>
     </layer-tree-layer>
   </layer-tree-group>

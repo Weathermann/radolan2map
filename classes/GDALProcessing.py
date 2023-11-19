@@ -1,15 +1,8 @@
 # -*- coding: utf-8 -*-
 
-'''
-Created on 23.11.2017
-
-@author: Weatherman
-'''
-
-import os
-from os import path
+from pathlib import Path
 import sys
-import platform    # to determine wether Windows or not
+import platform    # running on Windows or not
 import subprocess
 
 import processing
@@ -23,21 +16,17 @@ from osgeo import gdal    #, osr    # install Paket: 'python3-gdal'
 
 
 
-
 class GDALProcessing:
-    '''
-    classdocs
-    '''
+    """
+    Created on 23.11.2017
+    @author: Weatherman
+    """
     
     
     def __init__(self, model, full_asc_filename, full_tif_filename):
-        """
-        Constructor
-        """
         
         self.out(f"<- model, '{full_asc_filename}', '{full_tif_filename}'")
-        
-        
+
         #
         # Input data
         #
@@ -46,12 +35,11 @@ class GDALProcessing:
             raise OSError("'model' is None!")
         
         self._model = model
-        self._full_asc_filename = full_asc_filename
-        self._full_tif_filename = full_tif_filename
-        
-        
+        self._full_asc_filename = Path(full_asc_filename)
+        self._full_tif_filename = Path(full_tif_filename)
+
         #
-        # Ermittelt
+        # determined
         #
         
         self._result = None    # TIF-File oder TIF-Ergebnis im Speicher zur Weiterverarbeitung
@@ -70,38 +58,12 @@ class GDALProcessing:
     
     def __str__(self):
         return self.__class__.__name__
-    
-    
+
     def out(self, s, ok=True):
         if ok:
             print(f"{self}: {s}")
         else:
             print(f"{self}: {s}", file=sys.stderr)
-    
-    
-    
-    def produce_warped_tif_using_script(self):
-        """
-        Convert by command line
-        """
-        
-        # starting with 'python3' so that it work on Windows?
-        cmd = f'python3 {self._convert_script_path} "{self._full_asc_filename}"  -o "{self._full_tif_filename.parent}"'
-        self.out(f'running: "{cmd}"')
-        """
-        * To also capture standard error in the result, use stderr=subprocess.STDOUT
-        * shell=True, wenn cmd=string. Sonst als []
-        * Since Python 3.6 you can make check_output() return a str instead
-          of bytes by giving it an encoding parameter: ..., encoding='UTF-8' """
-        # Exception (wenn exit != 0) auffangen:
-        try:
-            out = subprocess.check_output(cmd,
-                stderr=subprocess.STDOUT, shell=True, universal_newlines=True, encoding='UTF-8')
-        except subprocess.CalledProcessError as e:
-            print(e.output)
-        else:
-            print(out)
-    
     
     
     def produce_warped_tif_by_python_gdal(self, prj_src, prj_dest_epsg, shapefile=None):
@@ -119,7 +81,7 @@ class GDALProcessing:
                         '+x_0=0 +y_0=0 +a=6370040 +b=6370040'
                         '+units=m +no_defs')
         '''
-        
+
         """\
 A PRJ file contains a projected coordinate system.
 It begins with a name for the projected coordinate system.
@@ -156,8 +118,7 @@ PROJCS["DWD (RADOLAN)",
     AXIS["X",EAST],
     AXIS["Y",NORTH]]'''
         
-        
-        
+
         """
         Beginn
         """
@@ -170,7 +131,7 @@ PROJCS["DWD (RADOLAN)",
         ds_in.SetProjection(spatial_ref)
     
     
-        """ # geht so
+        """ # works:
         dest = osr.SpatialReference()
         dest.ImportFromEPSG(3035)
         gdal.Warp(tif_file, ds_in, srcSRS=proj4_params, dstSRS=dest)
@@ -195,10 +156,35 @@ PROJCS["DWD (RADOLAN)",
             gdal.Warp(str(self._full_tif_filename), ds_in,
                   srcSRS=prj_src, dstSRS=prj_dest_epsg,
                   creationOptions=[f'COMPRESS={compress_method}'])
-        
-        
-    
-    
+
+
+    """
+    following: old warp methods / scripts:
+    """
+
+    def produce_warped_tif_using_script(self):
+        """
+        Convert by command line
+        """
+
+        # starting with 'python3' so that it work on Windows?
+        cmd = f'python3 {self._convert_script_path} "{self._full_asc_filename}"  -o "{self._full_tif_filename.parent}"'
+        self.out(f'running: "{cmd}"')
+        """
+        * To also capture standard error in the result, use stderr=subprocess.STDOUT
+        * shell=True, wenn cmd=string. Sonst als []
+        * Since Python 3.6 you can make check_output() return a str instead
+          of bytes by giving it an encoding parameter: ..., encoding='UTF-8' """
+        # Exception (wenn exit != 0) auffangen:
+        try:
+            out = subprocess.check_output(cmd,
+                                          stderr=subprocess.STDOUT, shell=True, universal_newlines=True,
+                                          encoding='UTF-8')
+        except subprocess.CalledProcessError as e:
+            print(e.output)
+        else:
+            print(out)
+
     def produce_warped_tif(self, write_result):
         
         self.out("produce_warped_tif()")
@@ -208,9 +194,9 @@ PROJCS["DWD (RADOLAN)",
         """
         
         # very important!
-        if path.exists(self._full_tif_filename):
+        if self._full_tif_filename.exists():
             #self.out("removing old version of warped TIF before creating a new one...")
-            os.remove(self._full_tif_filename)
+            self._full_tif_filename.unlink()
         
         
         proj_radolan = self._model.projection_radolan
@@ -293,14 +279,14 @@ PROJCS["DWD (RADOLAN)",
             self.out(e, False)
             self.out("continue without dict keys 'RAST_EXT', 'EXT_CRS'", False)
         
-        # Nur wenn Try OK: section for determining the extent of input raster by creating layer datatype
+        # only if try OK: section for determining the extent of input raster by creating layer datatype
         else:
             self.out(f"GdalUtils.version is {version}")
             # Result for
             # Dev-Version/Linux:  2010200
             # 2.18.15 Las Palmas: 2020300
             
-            # Für diese Versionsnummer ging es nämlich NICHT! (openSUSE Leap 42.3, obige QGIS-Version)
+            # For this version number it didn't work! (openSUSE Leap 42.3, QGIS version see above)
             if version != 2020300:
                 add_additional_keys = True
             
@@ -320,12 +306,10 @@ PROJCS["DWD (RADOLAN)",
             params['EXT_CRS' ] = proj_radolan               ### NEW! for new gdal versions. MUST be Radolan-Proj.!!!
             self.out("  -> inserting new keys 'RAST_EXT', 'EXT_CRS'")
         
-        
-        
+
         # Diagnose:
         print("### Dict params are:\n ", params)
-        
-        
+
         # For overview of the parameters use in QGIS python console:
         # processing.alghelp("gdalogr:warpreproject")
         #target = processing.runalg("gdalogr:warpreproject", params )    # return: dict    QGIS 2
@@ -334,7 +318,7 @@ PROJCS["DWD (RADOLAN)",
         fallback = False
         
         # TIF shouldt be written but doesn't exists:
-        if write_result and not path.exists(self._full_tif_filename):
+        if write_result and not self._full_tif_filename.exists():
             fallback = True
         
         
@@ -345,8 +329,7 @@ PROJCS["DWD (RADOLAN)",
             self._result = QgsProcessingUtils.mapLayerFromString(target["OUTPUT"], context)
             #print("result =", self._result)
             return    #return self._result
-        
-        
+
         """
         When warped TIF wasn't created:
         FALLBACK MODE without dict
@@ -377,7 +360,7 @@ PROJCS["DWD (RADOLAN)",
         oldValidation = settings.value( "/Projections/defaultBehavior" )
         settings.setValue( "/Projections/defaultBehavior", "useGlobal" )
         
-        asc_layer = QgsRasterLayer(self._full_asc_filename, path.basename(self._full_asc_filename) )
+        asc_layer = QgsRasterLayer(self._full_asc_filename, self._full_asc_filename.name)
         
         crs_radolan = QgsCoordinateReferenceSystem()
         crs_radolan.createFromProj4(proj_radolan)
@@ -394,16 +377,15 @@ PROJCS["DWD (RADOLAN)",
         
         return asc_layer
         
-    
-    
+
     def _produce_warped_tif_fallback(self, write_result):
         """ Fallback Method.
         Normally not used. Uses the same handed over parameters as the normal method """
         
         self.out("_produce_warped_tif_fallback()")
         
-        self.out("ERROR: warped TIF wasn't produced, maybe there is a problem with" \
-            + " the processing.runalg dict interface(?)", False)
+        self.out("ERROR: warped TIF wasn't produced, maybe there is a problem with"
+                 " the processing.runalg dict interface(?)", False)
         self.out("switching to fallback mode with handed over conventional arguments", False)
         
         """
@@ -450,14 +432,14 @@ PROJCS["DWD (RADOLAN)",
     
     def clip_raster_by_mask(self, mask_shape):
         
-        clipped_tif_name = path.basename(self._full_tif_filename).replace('.tif', "_clipped.tif")
-        clipped_tif_name = path.join(self._model.data_dir, clipped_tif_name)
+        clipped_tif_name = self._full_tif_filename.name.replace('.tif', "_clipped.tif")
+        clipped_tif_path = Path(self._model.data_dir, clipped_tif_name)
         
         self.out(f"clip_raster_by_mask('{mask_shape}')")
         
-        if path.exists(clipped_tif_name):
+        if clipped_tif_path.exists():
             self.out("  removing old version of clipped TIF before creating a new one...")
-            os.remove(clipped_tif_name)
+            clipped_tif_path.unlink()
         
         # MemoryLayer as input for next step:
         
@@ -470,21 +452,18 @@ PROJCS["DWD (RADOLAN)",
             'INPUT':   self._full_tif_filename,
             'MASK':    mask_shape,
             'OPTIONS': f'COMPRESS={compress_method}',
-            'OUTPUT':  clipped_tif_name
+            'OUTPUT':  str(clipped_tif_path)
         })
         
-        self.out(f"  -> '{clipped_tif_name}'")
+        self.out(f"  -> '{clipped_tif_path}'")
         
-        self._full_tif_filename = clipped_tif_name    # anpassen
+        self._full_tif_filename = clipped_tif_path    # anpassen
         
-        return clipped_tif_name
+        return clipped_tif_path
         
         ##--config GDALWARP_IGNORE_BAD_CUTLINE YES
-    
-    
+
     
     @property
     def tif_file(self):
         return self._full_tif_filename
-    
-    

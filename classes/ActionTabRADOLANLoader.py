@@ -1,12 +1,3 @@
-'''
-ActionTabRADOLANLoader
-
-Separate __actions__ of RADOLAN binary loading operations from the other components
-
-Created on 13.12.2020
-@author: Weatherman
-'''
-
 from pathlib import Path
 
 from qgis.core           import Qgis, QgsProject, QgsPrintLayout, QgsReadWriteContext, QgsLayerDefinition
@@ -18,34 +9,34 @@ from .ActionTabBase      import ActionTabBase         # base class
 from .NumpyRadolanReader import NumpyRadolanReader    # Input: read RADOLAN binary file
 from .ASCIIGridWriter    import ASCIIGridWriter       # Output 1: write ESRI ASCII Grid
 from .GDALProcessing     import GDALProcessing        # Output 2: write GeoTIFF
-from .Model import test_product_get_id    # import a function
+#from .Model import test_product_get_id    # import a function
 from .LayerLoader        import LayerLoader
 
 
 
 class ActionTabRADOLANLoader(ActionTabBase):
     """
-    classdocs
+    ActionTabRADOLANLoader
+
+    Separate __actions__ of RADOLAN binary loading operations from the other components
+
+    Created on 13.12.2020
+    @author: Weatherman
     """
     
     
     def __init__(self, iface, model, dock):
-        """
-        Constructor
-        """
         
         super().__init__(iface, model, dock)
-        
-        
-        
+
         """
         set connections
         """
         
         # Button for loading a prepared template project:
         dock.btn_load_project.clicked.connect(self._ask_user_load_template_project)
-        # Button für schnellen Test des PrintLayouts nutzen:
-        #dock.btn_load_project.clicked.connect(self._load_print_layout )    # !: Funktion ohne ()
+        # use button for easy test of PrintLayout:
+        #dock.btn_load_project.clicked.connect(self._load_print_layout )    # !: function without ()
         dock.btn_load_radars.clicked.connect(self._load_radarnetwork_layer)
         dock.filedialog_input.clicked.connect(self._select_input_file)
         dock.filedialog_mask.clicked.connect(self._select_mask)
@@ -57,15 +48,14 @@ class ActionTabRADOLANLoader(ActionTabBase):
         #apply_btn.clicked.connect(self._run)
         dock.btn_action.clicked.connect(self._run)
         
-        
-        
+
         combo = dock.cbbox_radolan    # shorten
         
         # read previously used files and prefill combo box for the user:
         history_file = model.history_file
         if history_file.exists():
             self.out(f"reading 'history file' {history_file}")
-            with open(history_file) as hf:
+            with history_file.open() as hf:
                 model.list_of_used_files = hf.read().splitlines()    # lines without '\n'
                 # hint: 'list_of_used_files' will be used further
             # fill:
@@ -77,8 +67,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         # Register event handler only here, so it is not triggered at filling above:
         combo.currentIndexChanged.connect(self._combo_selection_change)
         
-        
-        
+
         # set up later
         self.mask_file = model.default_border_shape    # default: "DEU_adm0"
         self._qml_file = None
@@ -154,18 +143,14 @@ class ActionTabRADOLANLoader(ActionTabBase):
         
         # trigger the Project Save As menu button.
         self._iface.mainWindow().findChild( QAction, 'mActionSaveProjectAs' ).trigger()
-        
-    
-    
+
     
     def _load_radarnetwork_layer(self):
-        ''' load DWDs radar network consisting of two layers (points and buffer)
-        by QgsLayerDefinition file '''
-        
-        
+        """ load DWDs radar network consisting of two layers (points and buffer)
+        by QgsLayerDefinition file """
+
         layergroup_name = "RadarNetwork"
-        
-        
+
         root = QgsProject.instance().layerTreeRoot()
         
         """
@@ -213,8 +198,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         self.out(f"loading layer definition file '{layer_def_file}'")
         QgsLayerDefinition().loadLayerDefinition(str(layer_def_file), QgsProject.instance(), group)
         
-    
-    
+
     def _select_input_file(self):
         combo = self.dock.cbbox_radolan    # shorten
         
@@ -229,9 +213,10 @@ class ActionTabRADOLANLoader(ActionTabBase):
         raa01-rw_10000-1708020250-dwd---bin
         raa01-rw_10000-1708020250-dwd---bin.gz
         adjust.pix """
-        # You can also add other filter. You need to separate them with a double ;; like so :
+        # You can also add other filter. You need to separate them with a double ;; like so:
         # "Images (*.png *.xpm .jpg);;Text files (.txt);;XML files (*.xml)"
-        file_filter = "RADOLAN binary files (*bin* *.pix);;Unknown product format (*)"
+        l_common_ext = "*bin* *.pix *_??? *_???.bz2"
+        file_filter = f"RADOLAN binary format ({l_common_ext});;Unknown product format (*)"
         
         input_file = self._show_open_file_dialog("Input binary RADOLAN file", start_dir, file_filter)
         
@@ -255,8 +240,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         if combo.count() == 1:
             self._combo_selection_change()
         
-    
-    
+
     def _combo_selection_change(self):
         #file = self.dock.inputpath.text()
         file = self.dock.cbbox_radolan.currentText()
@@ -275,7 +259,12 @@ class ActionTabRADOLANLoader(ActionTabBase):
         
         if not Path(file).exists():
             super()._show_critical_message_box("The specified file doesn't exist!", 'File error')
-            self._model.list_of_used_files.remove(file)
+            try:
+                self._model.list_of_used_files.remove(file)
+            except ValueError:
+                self.out("catched ValueError", False)
+                pass
+
             self.out(f"file '{file}' removed from list")
             action_btn.setEnabled(False)
             return
@@ -283,7 +272,13 @@ class ActionTabRADOLANLoader(ActionTabBase):
         # so far OK, enable action
         
         # Test product, if it is a 'X'-product (RX, WX, EX) with values coded as RVP6-units:
-        prod_id = test_product_get_id(file)
+        try:
+            nrr = NumpyRadolanReader(file)  # FileNotFoundError
+        except (FileNotFoundError, IOError):
+            raise
+
+        nrr._read_radolan_composite(loaddata=False)    # only read the metadata
+        prod_id = nrr.prod_id
         
         is_rx = True if prod_id[1] == 'X'  else False
         """ Further string tests on product id don't make sense,
@@ -301,9 +296,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         # after selection of RADOLAN file enable action button:
         action_btn.setEnabled(True)
         
-    
-    
-    
+
     def _select_mask(self):
         # Determine start directory:
         text = self.dock.inputmask.text()
@@ -311,8 +304,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
             start_dir = Path(text).parent
         else:
             start_dir = Path.home()
-        
-        
+
         # parent, caption, directory, file_filter
         inputmaskshp = self._show_open_file_dialog("Select mask (optional)",
                             str(start_dir), "Shape file (*.shp)")
@@ -321,8 +313,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         
         self.mask_file = inputmaskshp
     
-    
-    
+
     def _select_symbology(self):
         file_filter = "QGIS symbology files (*.qml*)"
         
@@ -333,29 +324,25 @@ class ActionTabRADOLANLoader(ActionTabBase):
         
         self.qml_file = qml_file
         
-    
-    
+
     def _show_open_file_dialog(self, title, path, file_filter):
         selection, _ = QFileDialog.getOpenFileName(self.dock, title, path, file_filter,
         # these additional parameters are used, because QFileDialog otherwise doesn't start with the given path:
             None, QFileDialog.DontUseNativeDialog)
         return selection    # can be None
     
-    
-    
+
     def _run(self):
         """
         Run method that performs all the real work.
         """
         
         model = self._model    # shorten
-        
-        
+
         radolan_file = self.dock.cbbox_radolan.currentText()
         
         # File exists (checked before) - so it can be already stored for later suggestion for the user:
-        
-        
+
         # Try to remove _this_ file (if contains), so it can be new positioned at the top:
         try:
             model.list_of_used_files.remove(radolan_file)
@@ -364,8 +351,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         
         model.list_of_used_files.insert(0, radolan_file)
         
-        
-        
+
         clip_to_mask = False
         
         # Checkbox enabled AND mask shape specified?
@@ -378,8 +364,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
             if not Path(self.mask_file).exists():
                 super()._show_critical_message_box("The specified mask file doesn't exist!", 'File error')
                 return
-        
-        
+
         # + + + + + + + + + + + + + + + +
         
         # evtl. Exception (from NumpyRadolanReader)
@@ -390,47 +375,48 @@ class ActionTabRADOLANLoader(ActionTabBase):
             return
         
         # + + + + + + + + + + + + + + + +
-        
-        
-        subdir_name = 'radklim' if nrr.is_radklim  else 'radolan'
+
+        # bring some order in possible radar data types (finished .tif will be saved there):
+        if nrr.is_radklim:
+            subdir_name = 'radklim'
+        elif nrr.is_polara:
+            subdir_name = 'polara'
+        else:
+            subdir_name = 'radolan'
         
         model.set_data_dir(subdir_name)
         model.create_storage_folder_structure()    # no cleaning temp, so we can check the temp result after running
         
         # define name of (clipped) TIFF file (based on .asc filename):
         tif_extension = '_clipped.tif' if clip_to_mask  else '.tif'
-        tif_bn = str(asc_filename_path).replace('.asc', tif_extension)    # tif basename
+        tif_bn = asc_filename_path.name.replace(".asc", tif_extension)    # tif basename
+
         full_tif_filename = model.data_dir / tif_bn
-        
-        
-        
+
+
         # Clip to the given mask (optional):
         shape_file = self.mask_file
         if not clip_to_mask:
             shape_file = None
-        
-        
+
+        prj_src = self._model.projection_polara_wgs if nrr.is_polara else self._model.projection_radolan
+
         # at GDAL processing a lot of strange errors are possible - with projection parameters and GDAL versions...
         try:
-
-            self.__create_tif_file(asc_filename_path, full_tif_filename, shape_file)
+            self.__create_tif_file(asc_filename_path, full_tif_filename, prj_src, shape_file)
         except Exception as e:
             super()._show_critical_message_box(str(e), 'GDAL processing error')
             return
         
-        
         """
         From here is related to GIS layer loading
         """
-        
         
         """
         If no project file not loaded when running plugin
         """
         
         super()._check_create_project()
-        
-        
         
         # Set symbology from QML file:
         # 1) as given parameter by user or
@@ -450,26 +436,11 @@ class ActionTabRADOLANLoader(ActionTabBase):
                 interval = -1
             else:
                 interval = nrr.interval    # default
-                '''
-                # override if product is 'SM' or 'SJ' because of 'E+00INT' in header...
-                # match with qml method in model!
-                d_prodid_interval = {
-                    'SM': 259000,
-                    # yearly:
-                    'SJ': 260000,
-                    'SY': 260000,
-                    'JW': 260000,
-                }
-                # if in dict:
-                try:
-                    interval = d_prodid_interval[nrr.prod_id]    # set specially new interval
-                    self.out("override interval because of 'E+00INT' in header! Set to interval={}".format(interval))
-                except KeyError:
-                    pass
-                '''
             # if else
-            
-            qml_file = model.qml_file(interval)    # <prod_id>.qml or 'None'
+
+            prod_id = nrr.prod_id if nrr.is_polara else None  # use special QML for "HG"/"WN" composite
+
+            qml_file = model.qml_file(interval, prod_id)
         # if not qml
         
         
@@ -503,7 +474,7 @@ class ActionTabRADOLANLoader(ActionTabBase):
         self.out(f"__read_radolan_create_ascii_file('{radolan_file}')")
         
         
-        self._model.create_storage_folder_structure(temp_dir=True)    # only create tmp_dir
+        self._model.create_storage_folder_structure(use_temp_dir=True)    # only create tmp_dir
         
         #exclude_zeroes = self.dock.check_excl_zeroes.isChecked()
         #self._ascii_converter = RadolanBin2AsciiConverter(input_file, model.temp_dir, exclude_zeroes)
@@ -528,49 +499,45 @@ class ActionTabRADOLANLoader(ActionTabBase):
         """
         filename, dim, _max, _min, mean, total, valid, nonvalid = nrr.get_statistics()
         s_max = str(_max)
-        # if part after point is too long:
-        l_max = s_max.split('.')
-        if len(l_max[1]) > 2:
-            s_max = f"{_max:.2f}"
-        
+        if _max is not None:  # 'HG'-product
+            # if part after point is too long:
+            l_max = s_max.split('.')
+            if len(l_max[1]) > 2:
+                s_max = f"{_max:.2f}"
+        if mean is not None:  # 'HG'-product
+            mean = f"{mean:.2f}"
+
         self.dock.text_filename.setText(filename)
         self.dock.text_shape.setText(dim)
         self.dock.text_max.setText(s_max)
         self.dock.text_min.setText(str(_min))
-        self.dock.text_mean.setText(f"{mean:.2f}")
+        self.dock.text_mean.setText(mean)
         self.dock.text_total_pixels.setText(str(total))
         self.dock.text_valid_pixels.setText(str(valid))
         self.dock.text_nonvalid_pixels.setText(str(nonvalid))
         
         super()._enable_and_show_statistics_tab()
         
-        
-        
+
         """
         create ASCII file
         """
-        
         asc_file_bn = nrr.simple_name + ".asc"
         asc_filename_path = self._model.temp_dir / asc_file_bn    # produced in temp. dir
-        
-        ascii_writer = ASCIIGridWriter(nrr.data, nrr.precision, asc_filename_path)
+
+        # needed for adjusted NODATA value (-1 isn't suitable for negative dBZ):
+        nodata_value = -50.0 if nrr.is_dbz else None
+
+        ascii_writer = ASCIIGridWriter(nrr.data, nrr.precision, asc_filename_path, nodata_value)
         ascii_writer.write()
-        
-        
+
         return nrr, asc_filename_path
     
-    
-    
-    def __create_tif_file(self, asc_file, tif_file, shape_file=None):
-        """ raise Exception """
-        
-        # Parameters for 'GDALProcessing':
-        
-        #l_elems = self.dock.cbbox_projections.currentText().split()    # EPSG:3035 ETRS89 / LAEA Europe
-        #epsg_code = l_elems[0]
-        #if epsg_code == '-':    # RADOLAN
-        #    epsg_code = model.projection_radolan    # complete RADOLAN projection parameters
-        prj_src = self._model.projection_radolan
+
+    def __create_tif_file(self, asc_file, tif_file, prj_src, shape_file=None):
+        """ Parameters for 'GDALProcessing'
+        raise Exception """
+
         index = self.dock.cbbox_projections.currentIndex()
         prj_dest = self._model.projections[index]
         
@@ -580,12 +547,9 @@ class ActionTabRADOLANLoader(ActionTabBase):
         # at GDAL processing a lot of strange errors are possible - with projection parameters and GDAL versions...
         gdal_processing.produce_warped_tif_by_python_gdal(prj_src, prj_dest, shape_file)
         
-        
-    
-    
+
     # .........................................................
-    
-    
+
     @property
     def mask_file(self):
         return self._mask_file
@@ -601,5 +565,3 @@ class ActionTabRADOLANLoader(ActionTabBase):
     def qml_file(self, f):
         self._qml_file = f
         self.dock.inputqml.setText(f)
-    
-    

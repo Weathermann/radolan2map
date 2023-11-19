@@ -1,14 +1,3 @@
-'''
-ActionTabBase
-
-Base class of all specialized tab classes
-
-ActionTab classes act as it's own controllers
-
-Created on 19.12.2020
-@author: Weatherman
-'''
-
 import sys
 from pathlib import Path
 import time
@@ -20,80 +9,76 @@ from qgis.PyQt.QtXml     import QDomDocument
 
 
 class ActionTabBase:
-    '''
-    classdocs
-    '''
+    """
+    ActionTabBase
+
+    Base class of all specialized tab classes
+
+    ActionTab classes act as it's own controllers
+
+    Created on 19.12.2020
+    @author: Weatherman
+    """
     
     
     def __init__(self, iface, model, dock):
-        '''
-        Constructor
-        '''
-        
         print(self)
         
         self._iface = iface
         self._model = model
         self.dock   = dock
-    
-    
+
     
     def __str__(self):
         return self.__class__.__name__
-    
-    
+
     def out(self, s, ok=True):
         if ok:
             print(f"{self}: {s}")
         else:
             print(f"{self}: {s}", file=sys.stderr)
         
-    
-    
+
     def _show_critical_message_box(self, msg, caption='Exception catched'):
         self.out(msg, False)
         QMessageBox.critical(self._iface.mainWindow(), caption, msg)
     
-    
-    
+
     def _enable_and_show_statistics_tab(self):
         self.dock.tabWidget.setTabEnabled(self.dock.TAB_STATISTICS, True)
         self.dock.tabWidget.setCurrentIndex(self.dock.TAB_STATISTICS)    # show statistics tab
-    
-    
+
     
     def _check_create_project(self):
         """
         If no project file not loaded when running plugin
         """
         project = QgsProject.instance()
-        # Print the current project file name (might be empty in case no projects have been loaded)
-        #self.out("bisheriges Projekt: {}".format(project.fileName()))
-        
+        project_fn = project.fileName()
+        # for inspection of the project file, to determine, if it is a real file:
+        # QGIS 3.22: seems to be always 'True' for exists() (?)
+        #print(f"### project={project}, Path={project_fn}, exists={Path(project_fn).exists()}")
+
         # prepare project
-        if Path(project.fileName()).exists():
+        # QGIS 3.22: seems to be always 'True' for exists() (?), so check for content too:
+        if project_fn and Path(project_fn).exists():
             return
-        
         
         self.out("### no project open -> create a new one ###")
         project = self._model.create_default_project()
         
-        yyyymmddHHMM = time.strftime("%Y%m%d_%H%M")
-        new_file = self._model.data_root / yyyymmddHHMM + '.qgs'
-        self.out("write: {}".format(new_file))
-        project.write(new_file)
-        
-    
-    
+        yyyymmddHHMM_with_ext = time.strftime("%Y%m%d_%H%M") + '.qgs'
+        new_file = self._model.data_root / yyyymmddHHMM_with_ext
+        self.out(f"write: {new_file}")
+        project.write(str(new_file))
+
     
     def _finish(self):
-        ''' prints a unified message at end of operation '''
+        """ prints a unified message at end of operation """
         self.out("*** Whole process finished! ***")
     
     
-    
     def _load_print_layout(self, layer_name, prod_id, dt=None):
-        
         window_title = "Print"    # will be checked with a found composer title
         
         """
@@ -118,8 +103,7 @@ class ActionTabBase:
             #layout = QgsLayout(project)
             layout = QgsPrintLayout(project)
             layout.initializeDefaults()    # initializes default settings for blank print layout canvas
-            
-            
+
             q_xmldoc = self._create_qdocument_from_print_template_content()
             
             # load layout from template and add to Layout Manager
@@ -128,19 +112,17 @@ class ActionTabBase:
             layout.setName(window_title)
             
             layout_manager.addLayout(layout)
-            
-            
+
             # Update Logo:
             
             #logo_item = layout.getComposerItemById('logo')    # QGIS 2
             logo_item = layout.itemById('logo')
-            #self.out(">>> logo_item: '{}'".format(logo_item))    # gibt nur die Objekt-ID aus
             logo_image = self._model.logo_path
-            self.out("Logo: {}".format(logo_image))
+            self.out(f"Logo: {logo_image}")
             if logo_image.exists():
                 logo_item.setPicturePath(str(logo_image))
             else:
-                self.out("  ERROR: logo '{}' not found!".format(logo_image), False)
+                self.out(f"  ERROR: logo '{logo_image}' not found!", False)
         # if
         
         
@@ -167,22 +149,20 @@ class ActionTabBase:
             title    = self._model.title(prod_id, dt)
             subtitle = ""
             if prod_id != 'RW':
-                subtitle = "\n{}-Produkt (Basis: RW)".format(prod_id)
+                subtitle = f"\n{prod_id}-Produkt (Basis: RW)"
             
             composer_label.setText(title + subtitle)
         else:
             # A note that the template needs to be revised:
             self.out("no element with id 'headline' found!", False)
         
-        
-        
+
         legend = layout.itemById('legend')
         
         if not legend:
             self.out("legend couldn't created!", False)
             return
-        
-        
+
         #
         # Layer für die Legende ausfindig machen
         #
@@ -195,7 +175,7 @@ class ActionTabBase:
         l_layer = project.mapLayersByName(layer_name)
         
         if not l_layer:
-            self.out("legend: no layer found with name '{}'!".format(layer_name), False)
+            self.out(f"legend: no layer found with name '{layer_name}'!", False)
             return
         
         active_raster_layer = l_layer[0]
@@ -257,20 +237,18 @@ class ActionTabBase:
         #legendSize = legend.paintAndDetermineSize(None)
         #legend.setItemPosition(width - legendSize.width() - dw,  height - legendSize.height() - dh)
         #legend.setItemPosition(width - legend.width() - dw,  height - legend.height() - dh)
-        
-        
+
         # Also note that active_composer.composerWindow() has a hide() and show()
         #active_composer.composerWindow().hide()    # works
-        
-    
+
     
     def _create_qdocument_from_print_template_content(self):
         print_template = self._model.default_print_template
         
-        self.out("_create_qdocument_from_print_template_content(): {}".format(print_template))
+        self.out(f"_create_qdocument_from_print_template_content(): {print_template}")
         
         if not print_template:
-            raise FileNotFoundError()
+            raise FileNotFoundError(f"{print_template}")
         
         # Load template
         with print_template.open() as templateFile:

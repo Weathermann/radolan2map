@@ -1,12 +1,3 @@
-"""
-LayerLoader
-
-Loads creates and load a QgsRaster- or QgsVectorLayer
-
-Created on 07.12.2020
-@authors: Weatherman, Tobias Rosskopf
-"""
-
 import re
 import sys
 from pathlib import Path
@@ -27,14 +18,15 @@ import processing
 
 class LayerLoader:
     """
-    classdocs
+    LayerLoader
+
+    Loads creates and load a QgsRaster- or QgsVectorLayer
+
+    Created on 07.12.2020
+    @authors: Weatherman, Tobias Rosskopf
     """
     
     def __init__(self, iface):
-        """
-        Constructor
-        """
-        
         print(self)
 
         self._iface = iface
@@ -42,6 +34,7 @@ class LayerLoader:
         # set or determined later:
         self._no_zeros = False  # set zeros invisible
         self._layer_name = None
+        self._temporal = None
 
     def __str__(self):
         return self.__class__.__name__
@@ -50,11 +43,11 @@ class LayerLoader:
         if ok:
             print(f"{self}: {s}")
         else:
-
             print(f"{self}: {s}", file=sys.stderr)
 
 
-    def _show_message(self, qgis_state, layer_name, duration):
+    def _show_message(self, qgis_state, layer_name, duration=0):
+        """ Where the integer 0 indicates a no timeout (i.e. no duration). """
 
         if qgis_state == Qgis.Success:
             title = "Success"
@@ -65,13 +58,11 @@ class LayerLoader:
             self.out(msg, False)
         
         self._iface.messageBar().pushMessage(title, msg, level=qgis_state, duration=duration)
-    
-    
-    
+
 
     def load_raster(self, tif_file, qml_file=None, temporal=False):
 
-        self.temporal = temporal
+        self._temporal = temporal
 
         bn = Path(tif_file).name
 
@@ -193,7 +184,7 @@ class LayerLoader:
             self._set_zeroes_invisible(layer)
 
         # Set temporal settings for layer (since QGIS 3.14)
-        if self.temporal and Qgis.QGIS_VERSION_INT >= 31400:
+        if self._temporal and Qgis.QGIS_VERSION_INT >= 31400:
             self.out("Setting temporal settings ...")
             self._set_time_range(layer)
 
@@ -202,9 +193,7 @@ class LayerLoader:
 
         # Add the layer to the QGIS Map Layer Registry (the second argument must be set to False
         # to specify a custom position:
-        QgsProject.instance().addMapLayer(
-            layer, False
-        )  # first add the layer without showing it
+        QgsProject.instance().addMapLayer(layer, False)  # first add the layer without showing it
 
         # obtain the layer tree of the top-level group in the project
         layerTree = self._iface.layerTreeCanvasBridge().rootGroup()
@@ -233,7 +222,7 @@ class LayerLoader:
 
     def _set_qml(self, layer, qml_file):
         """
-        @param raster_layer: QgsRasterLayer
+        @param layer: QgsRasterLayer
         """
         
         self.out(f"using QML file '{qml_file}'")
@@ -263,9 +252,7 @@ class LayerLoader:
         time_delta = self._extract_time_delta_from_layer_name(layer.name())
         timestamp_end = self._extract_timestamp_from_layername(layer.name())
         timestamp_start = timestamp_end - time_delta
-        self.out(
-            f"Time range from {timestamp_start:%d.%m.%Y %H:%M} to {timestamp_end:%d.%m.%Y %H:%M}."
-        )
+        self.out(f"Time range from {timestamp_start:%d.%m.%Y %H:%M} to {timestamp_end:%d.%m.%Y %H:%M}.")
 
         temp_props = layer.temporalProperties()
         temp_props.setMode(QgsRasterLayerTemporalProperties.ModeFixedTemporalRange)
@@ -291,11 +278,17 @@ class LayerLoader:
         }
         product_name = layername.split("_")[0]
 
+
+        # TODO: better pass var "INT" from RADOLAN header instead to define again(?)
+        try:
+            time_delta = PRODUCT_DICT[product_name]
+        # if product not defined, eg. "HG"product:
+        except KeyError:
+            time_delta = 5
+
         # time delta minus 1 minute to avoid overlapping of layers
         # TODO: still overlapps with next layer, but why?
-        time_delta = PRODUCT_DICT[product_name] - 1
-
-        return timedelta(minutes=time_delta)
+        return timedelta(minutes=time_delta-1)
 
     def _extract_timestamp_from_layername(self, layername: str) -> datetime:
         """
