@@ -37,14 +37,12 @@ from console import console    # show python console automatically
 
 # Eigene Klassen
 # .........................................................
-class_path = Path(__file__).parent / 'classes'
-sys.path.append(str(class_path))    # directory of further classes
-from gui import DockWidget
-from Model import Model
-from ActionTabRADOLANLoader import ActionTabRADOLANLoader
-from ActionTabRADOLANAdder  import ActionTabRADOLANAdder
-from ActionTabRegnie        import ActionTabRegnie
-from SettingsTab            import SettingsTab
+from .classes.gui import DockWidget
+from .classes.Model import Model
+from .classes.ActionTabRADOLANLoader import ActionTabRADOLANLoader
+from .classes.ActionTabRADOLANAdder  import ActionTabRADOLANAdder
+from .classes.ActionTabRegnie        import ActionTabRegnie
+from .classes.SettingsTab            import SettingsTab
 # .........................................................
 
 

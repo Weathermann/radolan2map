@@ -16,10 +16,10 @@ from qgis.PyQt.QtWidgets import QFileDialog
 from qgis.PyQt.QtCore    import QDateTime
 
 # own classes:
-from ActionTabBase      import ActionTabBase         # base class
-from NumpyRadolanAdder  import NumpyRadolanAdder
-from GDALProcessing     import GDALProcessing
-from LayerLoader        import LayerLoader
+from .ActionTabBase      import ActionTabBase         # base class
+from .NumpyRadolanAdder  import NumpyRadolanAdder
+from .GDALProcessing     import GDALProcessing
+from .LayerLoader        import LayerLoader
 
 """
 The format of date and datetime is different from the format of QDate and QDateTime,

@@ -11,10 +11,10 @@ from pathlib import Path
 from qgis.PyQt.QtWidgets import QFileDialog
 
 # own classes:
-from ActionTabBase  import ActionTabBase         # base class
-from LayerLoader    import LayerLoader
-from Regnie         import Regnie
-import regnie2raster as r2r
+from .ActionTabBase  import ActionTabBase         # base class
+from .LayerLoader    import LayerLoader
+from .Regnie         import Regnie
+from . import regnie2raster as r2r
 
 class ActionTabRegnie(ActionTabBase):
     '''

@@ -14,7 +14,7 @@ from qgis.core           import QgsProject
 from qgis.PyQt.QtWidgets import QFileDialog
 
 # own classes:
-from ActionTabBase import ActionTabBase         # base class
+from .ActionTabBase import ActionTabBase         # base class
 
 
 

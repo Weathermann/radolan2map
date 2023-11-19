@@ -13,8 +13,8 @@ import numpy as np
 import warnings
 import re
 
-from NumpyRadolanReader import NumpyRadolanReader    # Input
-from ASCIIGridWriter    import ASCIIGridWriter       # Output
+from .NumpyRadolanReader import NumpyRadolanReader    # Input
+from .ASCIIGridWriter    import ASCIIGridWriter       # Output
 
 
 

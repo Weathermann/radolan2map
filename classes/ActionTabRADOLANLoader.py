@@ -14,12 +14,12 @@ from qgis.PyQt.QtCore    import QSettings
 from qgis.PyQt.QtWidgets import QFileDialog, QMessageBox, QAction
 
 # own classes:
-from ActionTabBase      import ActionTabBase         # base class
-from NumpyRadolanReader import NumpyRadolanReader    # Input: read RADOLAN binary file
-from ASCIIGridWriter    import ASCIIGridWriter       # Output 1: write ESRI ASCII Grid
-from GDALProcessing     import GDALProcessing        # Output 2: write GeoTIFF
-from Model import test_product_get_id    # import a function
-from LayerLoader        import LayerLoader
+from .ActionTabBase      import ActionTabBase         # base class
+from .NumpyRadolanReader import NumpyRadolanReader    # Input: read RADOLAN binary file
+from .ASCIIGridWriter    import ASCIIGridWriter       # Output 1: write ESRI ASCII Grid
+from .GDALProcessing     import GDALProcessing        # Output 2: write GeoTIFF
+from .Model import test_product_get_id    # import a function
+from .LayerLoader        import LayerLoader
 
 
 
