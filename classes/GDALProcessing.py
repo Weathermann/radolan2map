@@ -12,16 +12,14 @@ from qgis.PyQt.QtCore import QSettings
 
 from osgeo import gdal    #, osr    # install Paket: 'python3-gdal'
 
+gdal.UseExceptions()  # Enable exceptions
+
 #convert_script = 'radolanasc_to_laeatif.py'    # <- .asc file
 
 
-
 class GDALProcessing:
-    """
-    Created on 23.11.2017
-    @author: Weatherman
-    """
-    
+    """Created on 23.11.2017
+    @author: Weatherman"""
     
     def __init__(self, model, full_asc_filename, full_tif_filename):
         
@@ -54,8 +52,7 @@ class GDALProcessing:
         self._convert_script_path = convert_script_path
         '''
         self._convert_script_path = None    # only for old method
-    
-    
+
     def __str__(self):
         return self.__class__.__name__
 
@@ -65,12 +62,9 @@ class GDALProcessing:
         else:
             print(f"{self}: {s}", file=sys.stderr)
     
-    
     def produce_warped_tif_by_python_gdal(self, prj_src, prj_dest_epsg, shapefile=None):
-        """
-        Convert by OSGEO python gdal module
-        """
-        
+        """Convert by OSGEO python gdal module"""
+
         self.out(f"produce_warped_tif_by_python_gdal('{prj_dest_epsg}', shapefile='{shapefile}')")
         
         #proj4_params = "+proj=stere +lat_0=90 +lat_ts=60 +lon_0=10 +k=0.93301270189"\
@@ -117,7 +111,6 @@ PROJCS["DWD (RADOLAN)",
     UNIT["Meter",1.0],
     AXIS["X",EAST],
     AXIS["Y",NORTH]]'''
-        
 
         """
         Beginn
@@ -129,7 +122,6 @@ PROJCS["DWD (RADOLAN)",
         #srs.ImportFromWkt(spatial_ref)
         #ds_in.SetProjection(srs.ExportToWkt())
         ds_in.SetProjection(spatial_ref)
-    
     
         """ # works:
         dest = osr.SpatialReference()
@@ -148,15 +140,16 @@ PROJCS["DWD (RADOLAN)",
         # with clipping:
         if shapefile:
             gdal.Warp(str(self._full_tif_filename), ds_in,
-                  cutlineDSName=f'{shapefile}', cropToCutline=True,
-                  srcSRS=prj_src, dstSRS=prj_dest_epsg,
-                  creationOptions=[f'COMPRESS={compress_method}'])
+                      cutlineDSName=f'{shapefile}', cropToCutline=True,
+                      srcSRS=prj_src, dstSRS=prj_dest_epsg,
+                      creationOptions=[f'COMPRESS={compress_method}'])
         # without clipping:
         else:
             gdal.Warp(str(self._full_tif_filename), ds_in,
-                  srcSRS=prj_src, dstSRS=prj_dest_epsg,
-                  creationOptions=[f'COMPRESS={compress_method}'])
+                      srcSRS=prj_src, dstSRS=prj_dest_epsg,
+                      creationOptions=[f'COMPRESS={compress_method}'])
 
+        ds_in = None  # should one do that?
 
     """
     following: old warp methods / scripts:
@@ -186,7 +179,6 @@ PROJCS["DWD (RADOLAN)",
             print(out)
 
     def produce_warped_tif(self, write_result):
-        
         self.out("produce_warped_tif()")
         
         """
@@ -197,7 +189,6 @@ PROJCS["DWD (RADOLAN)",
         if self._full_tif_filename.exists():
             #self.out("removing old version of warped TIF before creating a new one...")
             self._full_tif_filename.unlink()
-        
         
         proj_radolan = self._model.projection_radolan
         
@@ -290,8 +281,7 @@ PROJCS["DWD (RADOLAN)",
             if version != 2020300:
                 add_additional_keys = True
             
-        # Ende try-except-else-Block
-        
+        # End of try-except-else-block
         
         if add_additional_keys:
             # Make layer type from ASCII file to determine the mandatory 'extent':
@@ -305,7 +295,6 @@ PROJCS["DWD (RADOLAN)",
             params['RAST_EXT'] = extent_params_as_string    ### NEW! for new gdal versions.
             params['EXT_CRS' ] = proj_radolan               ### NEW! for new gdal versions. MUST be Radolan-Proj.!!!
             self.out("  -> inserting new keys 'RAST_EXT', 'EXT_CRS'")
-        
 
         # Diagnose:
         print("### Dict params are:\n ", params)
@@ -320,7 +309,6 @@ PROJCS["DWD (RADOLAN)",
         # TIF shouldt be written but doesn't exists:
         if write_result and not self._full_tif_filename.exists():
             fallback = True
-        
         
         # Normal mode: return Memory Layer:
         if not fallback:
@@ -344,8 +332,7 @@ PROJCS["DWD (RADOLAN)",
         
         # if success:
         # -> full_tif_filename is produced.
-    
-    
+
     def _create_QGSRasterLayer_with_projection(self, proj_radolan):
         """
         Change QGIS-Settings to avoid the assign CRS dialog to the ascii layer
@@ -357,8 +344,8 @@ PROJCS["DWD (RADOLAN)",
         https://gis.stackexchange.com/questions/27745/how-can-i-specify-the-crs-of-a-raster-layer-in-pyqgis/27765#27765
         """
         settings = QSettings()
-        oldValidation = settings.value( "/Projections/defaultBehavior" )
-        settings.setValue( "/Projections/defaultBehavior", "useGlobal" )
+        old_validation = settings.value("/Projections/defaultBehavior")
+        settings.setValue("/Projections/defaultBehavior", "useGlobal")
         
         asc_layer = QgsRasterLayer(self._full_asc_filename, self._full_asc_filename.name)
         
@@ -373,10 +360,9 @@ PROJCS["DWD (RADOLAN)",
         asc_layer.setCrs(crs_radolan) is not sufficient!
         == Part 2 of 2 ==
         """
-        settings.setValue( "/Projections/defaultBehavior", oldValidation )
+        settings.setValue("/Projections/defaultBehavior", old_validation)
         
         return asc_layer
-        
 
     def _produce_warped_tif_fallback(self, write_result):
         """ Fallback Method.
@@ -420,15 +406,13 @@ PROJCS["DWD (RADOLAN)",
         # without RAST_EXT, EXT_CRS:
         #processing.runalg("gdalogr:warpreproject",    # QGIS 2
         processing.run("gdal:warpreproject",    # QGIS 3
-            self._full_asc_filename,
-            self._model.projection_radolan, 'EPSG:3035',
-            "", 0, 0, 5, 4, 1, 1, 1, False, 2, False, "",
-            result )
+                        self._full_asc_filename,
+                        self._model.projection_radolan, 'EPSG:3035',
+                        "", 0, 0, 5, 4, 1, 1, 1, False, 2, False, "",
+                        result)
         
         self._result = result
-        
         #return result
-    
     
     def clip_raster_by_mask(self, mask_shape):
         
@@ -463,7 +447,6 @@ PROJCS["DWD (RADOLAN)",
         
         ##--config GDALWARP_IGNORE_BAD_CUTLINE YES
 
-    
     @property
     def tif_file(self):
         return self._full_tif_filename

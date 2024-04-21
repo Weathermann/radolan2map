@@ -1,7 +1,9 @@
+import os
 import re
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta
+from PyQt5.QtCore import Qt
 
 from qgis.core import (
     Qgis,
@@ -45,7 +47,6 @@ class LayerLoader:
         else:
             print(f"{self}: {s}", file=sys.stderr)
 
-
     def _show_message(self, qgis_state, layer_name, duration=0):
         """ Where the integer 0 indicates a no timeout (i.e. no duration). """
 
@@ -59,8 +60,60 @@ class LayerLoader:
         
         self._iface.messageBar().pushMessage(title, msg, level=qgis_state, duration=duration)
 
+    def create_and_load_layer_group(self, layergroup_name, list_of_files_and_qml):
+        self._temporal = True
 
-    def load_raster(self, tif_file, qml_file=None, temporal=False):
+        qgis_groups = QgsProject.instance().layerTreeRoot()
+        if qgis_groups.findGroup(layergroup_name):
+            self.out(f'adding layers to existing layer group "{layergroup_name}"')
+        else:
+            self.out(f'create layer group "{layergroup_name}"')
+            # obtain the layer tree of the top-level group in the project
+            root = self._iface.layerTreeCanvasBridge().rootGroup()
+            root.addGroup(layergroup_name)
+
+        # root = QgsProject.instance().layerTreeRoot()  # another possibility,
+        # but first group layers disappear in the second run(?)
+        tree = self._iface.layerTreeCanvasBridge().rootGroup()
+        layer_group = tree.findGroup(layergroup_name)
+        layer_group.setExpanded(False)  # collapse group after filling
+
+        # for performance reason disable output for many files:
+        saved_stdout = sys.stdout
+        saved_stderr = sys.stderr
+        self.out("disable output for performance reasons, loading layers...")
+        f_devnull = open(os.devnull, 'w')
+        sys.stdout = f_devnull
+        sys.stderr = sys.stdout  # redirect both
+
+        for tif_file, qml_file in list_of_files_and_qml:
+            bn = Path(tif_file).name
+            raster_layer = QgsRasterLayer(str(tif_file), bn)
+
+            if not raster_layer.isValid():
+                self._show_message(Qgis.Critical, bn)
+                continue
+
+            raster_layer.setName(Path(tif_file).stem)
+            self._insert_layer(raster_layer, qml_file, 0, layer_group)
+        # for
+
+        f_devnull.close()
+        sys.stderr = saved_stderr
+        sys.stdout = saved_stdout
+        self.out("output channels restored")
+
+        # TODO: collapse color definition
+        #for layer in layer_group.findLayers():
+        #    #print(layer.name())
+        #    # filtering only raster layers
+        #    if layer.type() == QgsMapLayerType.RasterLayer:  # RasterLayer?
+        #        LayerNode = root.findLayer(layer.id())
+        #        LayerNode.setExpanded(False)  # hiding the bands etc.
+
+        self._show_message(Qgis.Success, layer_name=f"Group {layergroup_name}", duration=5)
+
+    def load_raster(self, tif_file, qml_file=None, temporal=True):
 
         self._temporal = temporal
 
@@ -136,7 +189,6 @@ class LayerLoader:
         uri = f"file:///{csv_file}?delimiter=,&xField=LON&yField=LAT&crs=EPSG:4326"
         self.out(f"uri: {uri}")
 
-
         # Make a vector layer:
         csv_layer = QgsVectorLayer(uri, csv_file.name, "delimitedtext")
 
@@ -157,7 +209,7 @@ class LayerLoader:
             self.out(f'Layer with existing name "{layer.name()}" found - removing.')
             QgsProject.instance().removeMapLayer(layer.id())
     
-    def _insert_layer(self, layer, qml_file, duration):
+    def _insert_layer(self, layer, qml_file, duration, layer_group=None):
 
         # Build pyramids
         self.out("Building pyramids ...")
@@ -178,7 +230,6 @@ class LayerLoader:
             # layer.setLayerTransparency(40)    # %    this method seems only be available for vector layer
             layer.setOpacity(opa)
 
-
         # Set zero values to transparent
         if self._no_zeros:
             self._set_zeroes_invisible(layer)
@@ -188,24 +239,29 @@ class LayerLoader:
             self.out("Setting temporal settings ...")
             self._set_time_range(layer)
 
-
         # Insert layer at a certain position
 
         # Add the layer to the QGIS Map Layer Registry (the second argument must be set to False
         # to specify a custom position:
         QgsProject.instance().addMapLayer(layer, False)  # first add the layer without showing it
 
-        # obtain the layer tree of the top-level group in the project
-        layerTree = self._iface.layerTreeCanvasBridge().rootGroup()
+        # Obtain the layer tree of the top-level group in the project.
+        # if-else: root or layer group?
+        if layer_group:
+            root = layer_group
+        else:
+            root = self._iface.layerTreeCanvasBridge().rootGroup()
+
         # The position is a number starting from 0, with -1 an alias for the end.
-        # Index 0: ganz oben, Index 1: 2. Position unter der Vektor-Layer-Gruppe:
-        layerTree.insertChildNode(1, QgsLayerTreeLayer(layer))
+        # index 0: uppermost, index 1: second position under the vector layer group:
+        index = -1 if layer_group else 1
+        root.insertChildNode(index, QgsLayerTreeLayer(layer))
 
-        # mark the new layer and zoom to it's extent:
-        self._iface.setActiveLayer(layer)
-        self._iface.zoomToActiveLayer()
-
-        self._show_message(Qgis.Success, layer.name(), duration)
+        if not layer_group:
+            # mark the new layer and zoom to it's extent:
+            self._iface.setActiveLayer(layer)
+            self._iface.zoomToActiveLayer()
+            self._show_message(Qgis.Success, layer.name(), duration)
 
     def _set_zeroes_invisible(self, layer):
         self.out("setting zeroes to 100% transparency")
@@ -254,11 +310,18 @@ class LayerLoader:
         timestamp_start = timestamp_end - time_delta
         self.out(f"Time range from {timestamp_start:%d.%m.%Y %H:%M} to {timestamp_end:%d.%m.%Y %H:%M}.")
 
+        dt_range = QgsDateTimeRange(timestamp_start, timestamp_end)
+        begin = dt_range.begin()
+        begin.setTimeSpec(Qt.TimeSpec.UTC)
+        end = dt_range.end()
+        end.setTimeSpec(Qt.TimeSpec.UTC)
+        dt_range = QgsDateTimeRange(begin, end)
+        self.out(dt_range)
+
         temp_props = layer.temporalProperties()
         temp_props.setMode(QgsRasterLayerTemporalProperties.ModeFixedTemporalRange)
-        temp_props.setFixedTemporalRange(
-            QgsDateTimeRange(timestamp_start, timestamp_end)
-        )
+        #temp_props.setFixedTemporalRange(QgsDateTimeRange(timestamp_start, timestamp_end))
+        temp_props.setFixedTemporalRange(dt_range)
         temp_props.setIsActive(True)
 
     def _extract_time_delta_from_layer_name(self, layername: str) -> timedelta:

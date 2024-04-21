@@ -7,7 +7,7 @@ name=radolan2map
 qgisMinimumVersion=3.0
 # short text which describes the plugin, no HTML allowed:
 description=Brings DWD precipitation products like RADOLAN, RADKLIM and REGNIE onto a map
-version=1.7
+version=1.8
 author=Weatherman
 email=radolan2map@e.mail.de
 
@@ -23,9 +23,10 @@ about=This QGIS plugin brings precipitation radar data from German Meteorologica
   
   A RADOLAN-RW-testfile (gzipped binary) is included in directory 'example/sample_file/'.
 
-  The plugin was successfully tested with QGIS 3.18 and 3.22  
-  on Windows 10, Linux openSUSE 15.3  
-    
+  The plugin was successfully tested with
+  - QGIS 3.18 on Windows 10
+  - QGIS 3.36 Linux openSUSE Tumbleweed
+
   Please restart QGIS after updating the plugin!  
   
   Code Repository: <a href="https://github.com/Weathermann/radolan2map">https://github.com/Weathermann/radolan2map</a>  
@@ -43,6 +44,13 @@ hasProcessingProvider=no
 # Uncomment the following line and add your changelog:
 # string, can be multiline, no HTML allowed
 changelog=
+  1.8, 2024-04-21:
+    * Functionality
+      - allow multiselect in RADOLAN load tab
+      - automatically layer grouping (day), collapsed
+      - reduced log output for performance reason
+    * fix
+      - temporal settings (after project reload; UTC error?)
   1.7, 2023-01-23: 
     * Functionality - new products: display of the
       - HG product (precipitation type): https://opendata.dwd.de/weather/radar/composit/hg/

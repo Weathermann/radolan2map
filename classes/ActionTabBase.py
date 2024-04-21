@@ -9,8 +9,7 @@ from qgis.PyQt.QtXml     import QDomDocument
 
 
 class ActionTabBase:
-    """
-    ActionTabBase
+    """ ActionTabBase
 
     Base class of all specialized tab classes
 
@@ -19,8 +18,7 @@ class ActionTabBase:
     Created on 19.12.2020
     @author: Weatherman
     """
-    
-    
+
     def __init__(self, iface, model, dock):
         print(self)
         
@@ -28,7 +26,6 @@ class ActionTabBase:
         self._model = model
         self.dock   = dock
 
-    
     def __str__(self):
         return self.__class__.__name__
 
@@ -37,18 +34,15 @@ class ActionTabBase:
             print(f"{self}: {s}")
         else:
             print(f"{self}: {s}", file=sys.stderr)
-        
 
     def _show_critical_message_box(self, msg, caption='Exception catched'):
         self.out(msg, False)
         QMessageBox.critical(self._iface.mainWindow(), caption, msg)
-    
 
-    def _enable_and_show_statistics_tab(self):
+    def _enable_and_show_statistics_tab(self):  # TODO 11.03.2024: replace with method in 'gui.py'?
         self.dock.tabWidget.setTabEnabled(self.dock.TAB_STATISTICS, True)
         self.dock.tabWidget.setCurrentIndex(self.dock.TAB_STATISTICS)    # show statistics tab
 
-    
     def _check_create_project(self):
         """
         If no project file not loaded when running plugin
@@ -72,12 +66,10 @@ class ActionTabBase:
         self.out(f"write: {new_file}")
         project.write(str(new_file))
 
-    
     def _finish(self):
         """ prints a unified message at end of operation """
         self.out("*** Whole process finished! ***")
-    
-    
+
     def _load_print_layout(self, layer_name, prod_id, dt=None):
         window_title = "Print"    # will be checked with a found composer title
         
@@ -241,7 +233,6 @@ class ActionTabBase:
         # Also note that active_composer.composerWindow() has a hide() and show()
         #active_composer.composerWindow().hide()    # works
 
-    
     def _create_qdocument_from_print_template_content(self):
         print_template = self._model.default_print_template
         
@@ -261,5 +252,3 @@ class ActionTabBase:
         q_xmldoc.setContent(print_template_content, False)    # , bool namespaceProcessing
         
         return q_xmldoc
-    
-    

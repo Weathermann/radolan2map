@@ -2,23 +2,20 @@ import sys
 from pathlib import Path
 import numpy as np
 
-from NumpyRadolanReader import NumpyRadolanReader
+from .NumpyRadolanReader import NumpyRadolanReader
 
 default_nodata_value = -1.0
 
 
 class ASCIIGridWriter:
-    """
-    ASCIIGridWriter
+    """ASCIIGridWriter
 
     Creates a ESRI ASCII GRID (to convert this to GeoTIFF afterwards)
     from original binary RADOLAN file
 
     Created on 06.12.2020
-    @author: Weatherman
-    """
+    @author: Weatherman"""
 
-    
     def __init__(self, np_2Ddata, precision, asc_filename_path, nodata_value=default_nodata_value):
         """
         :param np_2Ddata:
@@ -41,8 +38,7 @@ class ASCIIGridWriter:
 
         if nodata_value != default_nodata_value:
             self.out(f"nodata_value: {nodata_value}")
-    
-    
+
     def __str__(self):
         return self.__class__.__name__
 
@@ -51,7 +47,6 @@ class ASCIIGridWriter:
             print(f"{self}: {s}")
         else:
             print(f"{self}: {s}", file=sys.stderr)
-
     
     def write(self):
         """
@@ -85,8 +80,7 @@ class ASCIIGridWriter:
         l_gis_header_template.append(f"nodata_value {self._nodata_value}")
 
         gis_header = "\n".join(l_gis_header_template)
-        
-        
+
         # precision: 1.0, 0.1, 0.01
         if self._prec == 0.1:
             fmt = '%.1f'
@@ -94,8 +88,7 @@ class ASCIIGridWriter:
             fmt = '%.2f'
         else:
             fmt = '%d'    # as integer
-        
-        
+
         np_data = np.copy(self._np_2Ddata)    # otherwise values will be changed
         
         #mask = np.isnan(np_data)
@@ -105,7 +98,7 @@ class ASCIIGridWriter:
         
         # np.flipud(): Flip array in the up/down direction.
         np.savetxt(self._asc_filename_path, np.flipud(np_data), fmt=fmt,
-                   delimiter=' ', newline='\n', header=gis_header, comments='') # footer=''
+                   delimiter=' ', newline='\n', header=gis_header, comments='')  # footer=''
         
         self.out(f"write(): -> {self._asc_filename_path}")
         

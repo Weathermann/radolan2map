@@ -42,7 +42,7 @@
      <string/>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="tab_action">
      <attribute name="icon">
@@ -50,7 +50,7 @@
        <normaloff>img/execute.png</normaloff>img/execute.png</iconset>
      </attribute>
      <attribute name="title">
-      <string>RADOLAN single mode</string>
+      <string>Load RADOLAN</string>
      </attribute>
      <attribute name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;load a RADOLAN binary file&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -62,8 +62,8 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>230</y>
-        <width>301</width>
+        <y>240</y>
+        <width>361</width>
         <height>22</height>
        </rect>
       </property>
@@ -71,7 +71,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Optional:&lt;br/&gt;Check this, if you have a self-created QML file.&lt;br/&gt;Leave disabled to try to assign a QML file automatically.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
-       <string>add self-defined symbology</string>
+       <string>add self-defined symbology (not necessary)</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -93,7 +93,7 @@
        <property name="geometry">
         <rect>
          <x>400</x>
-         <y>0</y>
+         <y>10</y>
          <width>41</width>
          <height>31</height>
         </rect>
@@ -113,7 +113,7 @@
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>0</y>
+         <y>10</y>
          <width>371</width>
          <height>32</height>
         </rect>
@@ -124,7 +124,7 @@
       <property name="geometry">
        <rect>
         <x>390</x>
-        <y>180</y>
+        <y>200</y>
         <width>41</width>
         <height>31</height>
        </rect>
@@ -147,7 +147,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>160</y>
+        <y>180</y>
         <width>301</width>
         <height>22</height>
        </rect>
@@ -167,19 +167,28 @@
        <rect>
         <x>10</x>
         <y>90</y>
-        <width>421</width>
-        <height>18</height>
+        <width>441</width>
+        <height>31</height>
        </rect>
       </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:13px; color:#232627; background-color:#fcfcfc;&quot;&gt;Loading a large number of rasters could take up significant amount of time.&lt;br/&gt;Testing with 288 rasters showed loading times of up to 10 minutes.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
       <property name="text">
-       <string>Input binary RADOLAN file - from selection history or new file</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a binary RADOLAN file - from selection history or new file:&lt;br/&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;(You can &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;select multiple files&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; by holding down the CTRL or Shift key as you click a file)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QFrame" name="frame">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>320</y>
+        <y>330</y>
         <width>411</width>
         <height>91</height>
        </rect>
@@ -246,7 +255,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>180</y>
+        <y>200</y>
         <width>371</width>
         <height>31</height>
        </rect>
@@ -255,8 +264,8 @@
      <widget class="QPushButton" name="filedialog_input">
       <property name="geometry">
        <rect>
-        <x>389</x>
-        <y>110</y>
+        <x>390</x>
+        <y>130</y>
         <width>41</width>
         <height>31</height>
        </rect>
@@ -327,8 +336,8 @@
      <widget class="QComboBox" name="cbbox_radolan">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>110</y>
+        <x>11</x>
+        <y>130</y>
         <width>371</width>
         <height>31</height>
        </rect>
@@ -1188,12 +1197,12 @@ automatically</string>
         <rect>
          <x>10</x>
          <y>10</y>
-         <width>81</width>
+         <width>391</width>
          <height>21</height>
         </rect>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Projections&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Projections: &lt;/span&gt;Select a projection to import&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </widget>

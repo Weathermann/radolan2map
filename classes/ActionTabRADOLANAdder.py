@@ -1,12 +1,5 @@
-'''
-ActionTabRADOLANAdder
-
-Separate __actions__ of RADOLAN summation operations from the other components
-
-Created on 02.12.2020
-@author: Weatherman
-'''
-
+import os
+import sys
 from pathlib import Path
 from copy import copy
 from datetime import datetime
@@ -30,11 +23,12 @@ df_qt = 'yyyy-MM-dd hh:mm'
 
 
 class ActionTabRADOLANAdder(ActionTabBase):
-    """
-    classdocs
-    """
-    
-    
+    """ActionTabRADOLANAdder
+    Separate __actions__ of RADOLAN summation operations from the other components
+
+    Created on 02.12.2020
+    @author: Weatherman """
+
     def __init__(self, iface, model, dock):
         """
         Constructor
@@ -42,15 +36,13 @@ class ActionTabRADOLANAdder(ActionTabBase):
         
         super().__init__(iface, model, dock)
         
-        
         # Listener
         dock.btn_select_dir_adder.clicked.connect(self._select_input_dir)
         dock.btn_scan.clicked.connect(self._scan_for_products)
         dock.btn_run_adder.clicked.connect(self._run)
         dock.btn_set_datetime.clicked.connect(self._set_begin_end_automatically)
         dock.listWidget.itemSelectionChanged.connect(self._listwidget_selection_changed)    # itemClicked.connect
-        
-        
+
         # setting date time 
         dt = QDateTime.currentDateTime()
         self.dock.dateTimeEdit_beg.setDateTime(dt)
@@ -63,15 +55,11 @@ class ActionTabRADOLANAdder(ActionTabBase):
         self._begin = None
         self._end   = None
         self._last_dir = None
-        
-    
-    
-    
+
     """
     Actions
     """
-    
-    
+
     def _select_input_dir(self):
         text = self.tf_path
         self._last_dir = text if text  else str(Path.home())
@@ -90,9 +78,7 @@ class ActionTabRADOLANAdder(ActionTabBase):
         self._scan_for_products()
         # but therefore disable the manual scan button:
         self.dock.btn_scan.setEnabled(False)
-    
-    
-    
+
     def _scan_for_products(self):
         self.out("_scan_for_products()")
         
@@ -120,7 +106,6 @@ class ActionTabRADOLANAdder(ActionTabBase):
         self._files.sort()
 
         self.dock.btn_set_datetime.setEnabled(True)
-
 
         # Detect product IDs and count:
 
@@ -154,7 +139,6 @@ class ActionTabRADOLANAdder(ActionTabBase):
         # again, because '_listwidget_selection_changed()' enables 'btn_run_adder':
         self.dock.btn_run_adder.setEnabled(False)
 
-
     def _set_begin_end_automatically(self):
         if not self._files:
             raise FileNotFoundError("No RADOLAN products in list!")
@@ -182,19 +166,12 @@ class ActionTabRADOLANAdder(ActionTabBase):
 
         self.dock.btn_set_datetime.setEnabled(False)
 
-
-    
     def _listwidget_selection_changed(self):
         self.dock.btn_run_adder.setEnabled(True)
-        
         item = self.dock.listWidget.currentItem().text()
         #print(item)
-        
         self._prod_id = item
-        
         self.__setup_suitable_datetime_for_selected_product(item)
-
-        
     
     def __setup_suitable_datetime_for_selected_product(self, prod_id):
         # self.dock.dateTimeEdit_beg.dateTime()): PyQt5.QtCore.QDateTime(2020, 12, 3, 20, 40, 56, 553)
@@ -210,7 +187,7 @@ class ActionTabRADOLANAdder(ActionTabBase):
         set_min = 50
         
         # 5 minute product: 'RZ', 'RY', 'YW', 'EZ', 'EY'
-        if prod_id[1] == 'Y'  or  prod_id[1] == 'Z'  or  prod_id == 'YW':
+        if prod_id[1] == 'Y' or prod_id[1] == 'Z' or prod_id == 'YW':
             # simple defaults:
             if dt_beg.minute > 31:
                 set_min = 45
@@ -223,9 +200,6 @@ class ActionTabRADOLANAdder(ActionTabBase):
         dt_new = dt_beg.replace(minute=set_min, second=0, microsecond=0)
         
         self.begin = dt_new.strftime(df_dt)
-        
-    
-    
     
     def _run(self):
         self.out("_run()")
@@ -246,7 +220,6 @@ class ActionTabRADOLANAdder(ActionTabBase):
         else:
             mask_file = None
 
-
         dock.btn_run_adder.setEnabled(False)    # disable run button during operation
         
         # QDateTime -> datetime and smooth date:
@@ -259,26 +232,33 @@ class ActionTabRADOLANAdder(ActionTabBase):
         #print("Begin:", dt_beg)
         #print("End:  ", dt_end)
         
-        
         # Try to catch every Exception and show it in a graphical window.
         
         df = '%Y%m%d%H%M'
         fn = f"{self._prod_id}_{dt_beg.strftime(df)}-{dt_end.strftime(df)}.asc"
         asc_filename_path = self._model.temp_dir / fn
-        
-        
+
+        # for performance reason disable output for many files:
+        saved_stdout = sys.stdout
+        saved_stderr = sys.stderr
+        self.out("disable output for performance reasons, add files...")
+        f_devnull = open(os.devnull, 'w')
+        sys.stdout = f_devnull
+        sys.stderr = sys.stdout  # redirect both
+
         try:
             # no cleaning temp, so we can check the temp result after running:
             self._model.create_storage_folder_structure(use_temp_dir=True)
-            
             adder = NumpyRadolanAdder(dt_beg, dt_end, self.tf_path, self._prod_id, asc_filename_path)
             adder.run()
-            
         except Exception as e:
             super()._show_critical_message_box(str(e))
             return
-        
-        
+        finally:
+            f_devnull.close()
+            sys.stderr = saved_stderr
+            sys.stdout = saved_stdout
+            self.out("output channels restored")
         
         """
         From here is related to GIS layer loading
@@ -290,7 +270,6 @@ class ActionTabRADOLANAdder(ActionTabBase):
         except Exception as e:
             super()._show_critical_message_box(str(e), 'GDAL processing error')
             return
-        
         
         """
         If no project file not loaded when running plugin
@@ -315,7 +294,6 @@ class ActionTabRADOLANAdder(ActionTabBase):
             # Determine prepared QML-File delivered with the plugin:
             qml_file = self._model.qml_file(interval_minutes)    # <dest_prod_id>.qml or 'None'
 
-
         ll = LayerLoader(self._iface)    # 'iface' is from 'radolan2map'
 
         if dock.check_excl_zeroes.isChecked():
@@ -323,10 +301,8 @@ class ActionTabRADOLANAdder(ActionTabBase):
 
         ll.load_raster(tif_file, qml_file, temporal=False)
 
-        
         dock.btn_run_adder.setEnabled(True)    # re-activate
-        
-        
+
         dim, _max, _min, mean, total, valid, nonvalid = adder.get_statistics()
         
         s_max = str(_max)
@@ -346,32 +322,24 @@ class ActionTabRADOLANAdder(ActionTabBase):
         
         super()._enable_and_show_statistics_tab()
         super()._finish()
-        
-        
-        super()._load_print_layout(ll.layer_name, prod_id='Sum')    # dt=None
 
-    
+        super()._load_print_layout(ll.layer_name, prod_id='Sum')    # dt=None
     
     def __convert_asc_tif(self, asc_filename_path, mask_file=None):
-        """
-        raise Exception
+        """raise Exception
         At GDAL processing a lot of strange errors are possible - with projection parameters and GDAL versions...
         """
-        
         model = self._model    # shorten
-        
         
         model.set_data_dir("sum")
         model.create_storage_folder_structure()
         
         tif_bn = asc_filename_path.name.replace('.asc', '.tif')    # tif basename
         tif_filename_path = model.data_dir / tif_bn
-        
 
         gdal_processing = GDALProcessing(model, asc_filename_path, tif_filename_path)
         #gdal_processing.produce_warped_tif_using_script()
-        
-        
+
         #l_elems = self.dock.cbbox_projections.currentText().split()    # EPSG:3035 ETRS89 / LAEA Europe
         #epsg_code = l_elems[0]
         #if epsg_code == '-':    # RADOLAN
@@ -389,8 +357,7 @@ class ActionTabRADOLANAdder(ActionTabBase):
         gdal_processing.produce_warped_tif_by_python_gdal(prj_src, prj_dest, shapefile=mask_file)    # Exception
         
         return gdal_processing.tif_file
-    
-    
+
     # ......................................................................
     
     @property
@@ -402,8 +369,7 @@ class ActionTabRADOLANAdder(ActionTabBase):
         # after folder selection enable scan button:
         self.dock.btn_scan.setEnabled(True)
         self._last_dir = path
-        
-    
+
     @property
     def begin(self):
         return self._begin
@@ -425,5 +391,3 @@ class ActionTabRADOLANAdder(ActionTabBase):
     @property
     def last_dir(self):
         return self._last_dir
-    
-    

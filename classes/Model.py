@@ -16,6 +16,8 @@ from . import def_products       # File 'def_products.py'
 from . import def_projections    # File 'def_projections.py'
 CONFIG_NAME = "config.ini"
 
+linux_tmp_root = Path("/dev/shm")
+linux_tmp = linux_tmp_root / "radolan2map"
 
 
 class Model:
@@ -67,6 +69,10 @@ class Model:
         self._l_projections      = []    # EPSG numbers or projection parameters
         self._list_of_used_files = []
 
+        self._linux_tmp = None
+        if linux_tmp_root.exists():
+            self.out(f"running on Linux, can use fast memory temp dir: {linux_tmp_root}")
+            self._linux_tmp = linux_tmp
 
         """
         fill projections
@@ -92,64 +98,56 @@ class Model:
             print(f"{self}: {s}")
         else:
             print(f"{self}: {s}", file=sys.stderr)
-    
-    
+
     def set_data_dir(self, subdir_name):
         self._data_dir = self.data_root / subdir_name
         self.out(f"set_data_dir(): {self._data_dir}")
-    
-    
+
     def create_storage_folder_structure(self, use_temp_dir=None):
         """ affects filesystem
         param: use_temp_dir: if it is set, then only create the temp_dir
+
+        *** REMOVE THIS SOMEDAY ***
         """
         
         self.out("create_storage_folder_structure()")
 
         if use_temp_dir:
-            """
-            temp dir    (with cleaning)
-            """
             
             temp_dir = self.temp_dir
-            
-            try:
-                os.makedirs(temp_dir)    # inclusive data dir
-            except FileExistsError:
-                # Remove old content:
-                print("  remove temp dir contents...")
-                # If ignore_errors is set, errors are ignored; otherwise, if onerror is set, it is called to handle ...
-                #shutil.rmtree(temp_dir)
-                #shutil.rmtree(path, ignore_errors=True)
-                # -> Deleting a whole directory is problematic ("in use").
-                
-                for f in temp_dir.glob("*"):
-                    try:
-                        f.unlink()
-                        """ Curiously an exception occurred in Windows (7) when loading data
-                        multiple times. Somehow the system does not let go of the data it touches. """
-                    except WindowsError as e:    # only available on Windows
-                        self.out(f"ERROR: {e}\n  try to ignore.")
-                # for
-            else:
+
+            if not temp_dir.exists():
+                temp_dir.mkdir(parents=True)  # mode=0o777, exist_ok=True
                 self.out(f"temp dir created: {temp_dir}")
-            
+                return
+
+            # Remove old content:
+            print("  remove temp dir contents...")
+            # If ignore_errors is set, errors are ignored; otherwise, if onerror is set, it is called to handle ...
+            #shutil.rmtree(temp_dir)
+            #shutil.rmtree(path, ignore_errors=True)
+            # -> Deleting a whole directory is problematic ("in use").
+
+            for f in temp_dir.glob("*"):
+                try:
+                    f.unlink()
+                    """ Curiously an exception occurred in Windows (7) when loading data
+                    multiple times. Somehow the system does not let go of the data it touches. """
+                except WindowsError as e:    # only available on Windows
+                    self.out(f"ERROR: {e}\n  try to ignore.")
+            # for
             return
         # if use_temp_dir
-        
-        
+
         """
         temp dir    maybe root was changed, so check again...
         data dir
         """
         
-        for _dir in (self.temp_dir, self._data_dir):
-            
-            try:
-                os.makedirs(_dir)
-                self.out(f"makedirs(): {_dir}")
-            except FileExistsError:
-                pass
+        for d in (self.temp_dir, self._data_dir):
+            d.mkdir(parents=True, exist_ok=True)  # mode=0o777
+            self.out(f"makedirs(): {d}")
+
     
     
     def write_history_file(self):
@@ -299,7 +297,8 @@ class Model:
         return self._data_dir
     @property
     def temp_dir(self):
-        return self.data_root / 'tmp'    # important NOT to use '_data_root' here!
+        # important NOT to use '_data_root' here!
+        return self._linux_tmp if self._linux_tmp else self.data_root / 'tmp'
     '''
     @property
     def layout_dir(self):
